@@ -11,6 +11,8 @@ int draw_vecs = 1;            //draw the vector field or not
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 
+
+
 //rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
 void rainbow(float value,float* R,float* G,float* B)
 {

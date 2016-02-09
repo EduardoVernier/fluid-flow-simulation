@@ -9,7 +9,9 @@
 #include <GL/glut.h>            //the GLUT graphics
 #include <GL/glui.h>
 
-
+#include <ctime>
+#include <unistd.h>
+#include <sys/time.h>
 
 #include "simulation.cpp"
 #include "visualization.cpp"

@@ -10,6 +10,8 @@
 #define PP_ID 206
 #define QT_ID 207
 
+timeval a;
+timeval b;
 
 //display: Handle window redrawing events. Simply delegates to visualize().
 void display(void)
@@ -83,58 +85,74 @@ void drag(int mx, int my)
 	lmx = mx; lmy = my;
 }
 
+void resume (int t)
+{
+    frozen = 0;
+}
 
 void control_cb(int control)
 {
-	switch (control)
-	{
-	case DT_INCREASE_ID:
-		dt += 0.01;
-		break;
-	case DT_DECREASE_ID:
-		dt -= 0.01;
-		break;
-	case HH_INCREASE_ID:
-		vec_scale *= 1.2;
-		break;
-	case HH_DECREASE_ID:
-		vec_scale *= 0.8;
-		break;
-	case FV_INCREASE_ID:
-		visc *= 1.2;
-		break;
-	case FV_DECREASE_ID:
-		visc *= 0.8;
-		break;
-	case PP_ID:
-		(frozen == 0)? frozen = 1: frozen = 0;
-		break;
-	case QT_ID:
-		exit(0);
-		break;
-	case CM_BD_ID:
-	case CM_RB_ID:
-	case CM_BW_ID:
-		scalar_col = control;
-		break;
-	}
 
-	glutPostRedisplay();
+    // In order to glut have enough time to render the config window
+    // the program needs to be frozen for 100ms so the second window
+    // becomes target of the display function instead of the main
+    if (control == PP_ID)
+    {
+        (frozen == 0)? frozen = 1: frozen = 0;
+    }
+    else
+    {
+        frozen = 1;
+        switch (control)
+        {
+        case DT_INCREASE_ID:
+            dt += 0.01;
+            break;
+        case DT_DECREASE_ID:
+            dt -= 0.01;
+            break;
+        case HH_INCREASE_ID:
+            vec_scale *= 1.2;
+            break;
+        case HH_DECREASE_ID:
+            vec_scale *= 0.8;
+            break;
+        case FV_INCREASE_ID:
+            visc *= 1.2;
+            break;
+        case FV_DECREASE_ID:
+            visc *= 0.8;
+            break;
+        case QT_ID:
+            exit(0);
+            break;
+        case CM_BD_ID:
+        case CM_RB_ID:
+        case CM_BW_ID:
+            scalar_col = control;
+            break;
+        }
 
+        glutPostRedisplay();
 
-	printf("dt: %.2f   Hedgehog Scale: %0.2f   Fluid Viscosity:%.5f \n", dt, vec_scale, visc);
+        glutTimerFunc(100, resume, 0);
+
+        printf("dt: %.2f   Hedgehog Scale: %0.2f   Fluid Viscosity:%.5f \n", dt, vec_scale, visc);
+    }
 }
 
 
 
 void init_control_window()
 {
+    gettimeofday(&a, 0);
+
     GLUI *glui = GLUI_Master.create_glui( "GLUI" );
 
-	glui->add_checkbox( "Matter", &draw_smoke);
-	glui->add_checkbox( "Vector Field", &draw_vecs);
-	glui->add_checkbox( "Direction Coloring", &color_dir);
-	glui->add_checkbox( "Thru Scalar Coloring", &color_dir);
+    glui->add_checkbox( "Matter", &draw_smoke, 0, control_cb);
+    glui->add_checkbox( "Vector Field", &draw_vecs, 0, control_cb);
+    glui->add_checkbox( "Direction Coloring", &color_dir, 0, control_cb);
+    glui->add_checkbox( "Thru Scalar Coloring", &color_dir, 0, control_cb);
 
 	GLUI_Panel *dt_panel = new GLUI_Panel (glui, "Time Step");
   	new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb );
