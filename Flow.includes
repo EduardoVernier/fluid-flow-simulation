@@ -1,0 +1,12 @@
+src
+src/fftw-2.1.5/include
+src/fftw-2.1.5/sourceAndDoc/fftw
+src/fftw-2.1.5/sourceAndDoc/mpi
+src/fftw-2.1.5/sourceAndDoc/rfftw
+src/fftw-2.1.5/sourceAndDoc/tests
+src/fftw-2.1.5/sourceAndDoc/threads
+src/include/GL
+src/tools
+src/fftw-2.1.5/sourceAndDoc/matlab
+src/code
+src/ui

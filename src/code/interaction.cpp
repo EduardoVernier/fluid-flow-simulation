@@ -1,3 +1,6 @@
+#define CM_BW_ID 100
+#define CM_RB_ID 101
+#define CM_BD_ID 102
 #define DT_INCREASE_ID 200
 #define DT_DECREASE_ID 201
 #define HH_INCREASE_ID 202
@@ -56,7 +59,8 @@ void keyboard(unsigned char key, int x, int y)
 //       cursor movement. Also inject some new matter into the field at the mouse location.
 void drag(int mx, int my)
 {
-	int xi,yi,X,Y; double  dx, dy, len;
+	int xi,yi,X,Y;
+	double  dx, dy, len;
 	static int lmx=0,lmy=0;				//remembers last mouse location
 
 	// Compute the array index that corresponds to the cursor location
@@ -108,9 +112,21 @@ void control_cb(int control)
 	case QT_ID:
 		exit(0);
 		break;
+	case CM_BD_ID:
+	case CM_RB_ID:
+	case CM_BW_ID:
+		scalar_col = control;
+		break;
 	}
+
+	glutPostRedisplay();
+
+
 	printf("dt: %.2f   Hedgehog Scale: %0.2f   Fluid Viscosity:%.5f \n", dt, vec_scale, visc);
 }
+
+
+
 void init_control_window()
 {
     GLUI *glui = GLUI_Master.create_glui( "GLUI" );
@@ -132,8 +148,15 @@ void init_control_window()
 	new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb );
 	new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb );
 
+	GLUI_Panel *color_panel = new GLUI_Panel (glui, "Color Mapping");
+	new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb );
+	new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb );
+	new GLUI_Button(color_panel, "Banded", CM_BD_ID, control_cb );
+
+
 	new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb );
 	new GLUI_Button(glui, "Quit", QT_ID, control_cb );
+	GLUI_Master.auto_set_viewport();
 
 	glui->set_main_gfx_window(main_window);
 }

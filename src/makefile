@@ -70,7 +70,7 @@ bin/ppm2array: tools/ppm2array.cpp tools/ppm.cpp
 
 bin/%: code/%.cpp $(GLUI_LIB)
 	clear
-	$(CXX) $(CPPFLAGS) -o $@ $<  $(LIBGLUI) $(LIBGLUT) $(LIBGL) $(LIBS)
+	$(CXX) -g $(CPPFLAGS) -o $@ $<  $(LIBGLUI) $(LIBGLUT) $(LIBGL) $(LIBS)
 
 $(GLUI_LIB): $(GLUI_OBJS)
 	ar -r $(GLUI_LIB) $(GLUI_OBJS)
