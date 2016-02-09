@@ -10,8 +10,10 @@
 #define PP_ID 206
 #define QT_ID 207
 
-timeval a;
-timeval b;
+GLUI_StaticText *dt_text;
+GLUI_StaticText *hh_text;
+GLUI_StaticText *visc_text;
+
 
 //display: Handle window redrawing events. Simply delegates to visualize().
 void display(void)
@@ -85,6 +87,19 @@ void drag(int mx, int my)
 	lmx = mx; lmy = my;
 }
 
+void update_variables_config_window()
+{
+	// Update variable values on the config window
+	char buffer[50];
+	sprintf(buffer, "= %.2f", dt);
+	dt_text->set_text(buffer);
+	sprintf(buffer, "= %.2f", vec_scale);
+	hh_text->set_text(buffer);
+	sprintf(buffer, "= %.6f", visc);
+	visc_text->set_text(buffer);
+}
+
+
 void resume (int t)
 {
     frozen = 0;
@@ -92,7 +107,6 @@ void resume (int t)
 
 void control_cb(int control)
 {
-
     // In order to glut have enough time to render the config window
     // the program needs to be frozen for 100ms so the second window
     // becomes target of the display function instead of the main
@@ -133,6 +147,8 @@ void control_cb(int control)
             break;
         }
 
+		update_variables_config_window();
+
         glutPostRedisplay();
 
         glutTimerFunc(100, resume, 0);
@@ -145,7 +161,6 @@ void control_cb(int control)
 
 void init_control_window()
 {
-    gettimeofday(&a, 0);
 
     GLUI *glui = GLUI_Master.create_glui( "GLUI" );
 
@@ -154,15 +169,19 @@ void init_control_window()
     glui->add_checkbox( "Direction Coloring", &color_dir, 0, control_cb);
     glui->add_checkbox( "Thru Scalar Coloring", &color_dir, 0, control_cb);
 
-	GLUI_Panel *dt_panel = new GLUI_Panel (glui, "Time Step");
+    GLUI_Panel *dt_panel = new GLUI_Panel (glui, "Time Step");
+	dt_text = glui->add_statictext_to_panel(dt_panel, "");
   	new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb );
 	new GLUI_Button(dt_panel, "Decrease", DT_DECREASE_ID, control_cb );
 
 	GLUI_Panel *hedgehog_panel = new GLUI_Panel (glui, "Hedgehog Scaling");
+	hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
   	new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb );
 	new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb );
 
 	GLUI_Panel *visc_panel = new GLUI_Panel (glui, "Fluid Viscosity");
+	visc_text = glui->add_statictext_to_panel(visc_panel, "");
+
 	new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb );
 	new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb );
 
@@ -171,9 +190,11 @@ void init_control_window()
 	new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb );
 	new GLUI_Button(color_panel, "Banded", CM_BD_ID, control_cb );
 
-
 	new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb );
 	new GLUI_Button(glui, "Quit", QT_ID, control_cb );
+
+	update_variables_config_window();
+
 	GLUI_Master.auto_set_viewport();
 
 	glui->set_main_gfx_window(main_window);
