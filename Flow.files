@@ -997,3 +997,10 @@ src/viewmodel.h
 src/ui/configwindow.h
 src/ui/configwindow.cpp
 src/ui/configwindow.ui
+src/code/Color.cpp
+src/code/ColorMap.cpp
+src/code/ColorMap.h
+src/code/interaction.cpp
+src/code/main.cpp
+src/code/simulation.cpp
+src/code/visualization.cpp

@@ -13,7 +13,7 @@ UNAME = $(shell uname)
 
 ifeq ($(UNAME), Linux)
 CXX       = g++
-CPPFLAGS += $(OPTS) -Wall -pedantic
+CPPFLAGS += $(OPTS) -std=c++11 -Wall -pedantic
 endif
 
 #######################################
@@ -49,13 +49,15 @@ GLUI_OBJS = glui_add_controls.o glui_string.o glui.o glui_bitmap_img_data.o glui
 
 GLUI_LIB = lib/libglui.a
 
-GLUI_EXAMPLES = bin/main # bin/example2 bin/example3 bin/example4 bin/example5 bin/example6
+GLUI_EXAMPLES = bin/main
+
+CLASSES = code/Color.cpp code/ColorMap.cpp # bin/example2 bin/example3 bin/example4 bin/example5 bin/example6
 
 GLUI_TOOLS = bin/ppm2array
 
 .PHONY: all setup examples tools clean depend dist
 
-all: setup $(GLUI_LIB) examples 
+all: setup $(GLUI_LIB) examples
 
 setup:
 	mkdir -p bin
@@ -70,7 +72,7 @@ bin/ppm2array: tools/ppm2array.cpp tools/ppm.cpp
 
 bin/%: code/%.cpp $(GLUI_LIB)
 	clear
-	$(CXX) -g $(CPPFLAGS) -o $@ $<  $(LIBGLUI) $(LIBGLUT) $(LIBGL) $(LIBS)
+	$(CXX) -g $(CPPFLAGS) -o $@ $< $(CLASSES) $(LIBGLUI) $(LIBGLUT) $(LIBGL) $(LIBS)
 
 $(GLUI_LIB): $(GLUI_OBJS)
 	ar -r $(GLUI_LIB) $(GLUI_OBJS)
@@ -85,7 +87,7 @@ docs:
 	doxygen doc/doxygen.cfg
 
 clean:
-	rm -f *.o $(GLUI_LIB) $(GLUI_EXAMPLES) $(GLUI_TOOLS) 
+	rm -f *.o $(GLUI_LIB) $(GLUI_EXAMPLES) $(GLUI_TOOLS)
 	rm -fr doc/html
 
 depend:
@@ -94,7 +96,7 @@ depend:
 DIST = glui-2.3.0
 
 dist: clean
-	mkdir -p $(DIST) 
+	mkdir -p $(DIST)
 	cp --parents \
 		`find -type f -name "*.cpp"` \
 		`find -type f -name "*.c"` \

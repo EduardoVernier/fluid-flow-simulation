@@ -99,7 +99,6 @@ void update_variables_config_window()
 	visc_text->set_text(buffer);
 }
 
-
 void resume (int t)
 {
     frozen = 0;
@@ -171,27 +170,32 @@ void init_control_window()
 
     GLUI_Panel *dt_panel = new GLUI_Panel (glui, "Time Step");
 	dt_text = glui->add_statictext_to_panel(dt_panel, "");
-  	new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb );
-	new GLUI_Button(dt_panel, "Decrease", DT_DECREASE_ID, control_cb );
+    new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb);
+    new GLUI_Button(dt_panel, "Decrease", DT_DECREASE_ID, control_cb);
 
 	GLUI_Panel *hedgehog_panel = new GLUI_Panel (glui, "Hedgehog Scaling");
 	hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
-  	new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb );
-	new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb );
+    new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
+    new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
 
 	GLUI_Panel *visc_panel = new GLUI_Panel (glui, "Fluid Viscosity");
 	visc_text = glui->add_statictext_to_panel(visc_panel, "");
 
-	new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb );
-	new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb );
+    new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb);
+    new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb);
 
 	GLUI_Panel *color_panel = new GLUI_Panel (glui, "Color Mapping");
-	new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb );
-	new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb );
-	new GLUI_Button(color_panel, "Banded", CM_BD_ID, control_cb );
+    new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);
+    new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb);
+    new GLUI_Button(color_panel, "Banded", CM_BD_ID, control_cb);
+    GLUI_Panel *clamp_ro = glui->add_panel_to_panel(color_panel, "Clamping", true);
+    glui->add_checkbox_to_panel(clamp_ro, "ON/OFF", &clamp_flag, 0, control_cb);
+    glui->add_edittext_to_panel(clamp_ro, "MIN", GLUI_EDITTEXT_FLOAT, &clamp_min, 0, control_cb);
+    glui->add_edittext_to_panel(clamp_ro, "MAX", GLUI_EDITTEXT_FLOAT, &clamp_max, 0, control_cb);
 
-	new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb );
-	new GLUI_Button(glui, "Quit", QT_ID, control_cb );
+
+    new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
+    new GLUI_Button(glui, "Quit", QT_ID, control_cb);
 
 	update_variables_config_window();
 

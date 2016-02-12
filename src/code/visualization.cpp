@@ -1,3 +1,6 @@
+#include "Color.cpp"
+#include "ColorMap.h"
+
 #define COLOR_BLACKWHITE 100   //different types of color mapping: black-and-white, rainbow, banded
 #define COLOR_RAINBOW 101
 #define COLOR_BANDS 102
@@ -11,35 +14,52 @@ int draw_vecs = 1;            //draw the vector field or not
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 
+int clamp_flag = 0;
+float clamp_min = 0, clamp_max = 10;
 
 
-//rainbow: Implements a color palette, mapping the scalar 'value' to a rainbow color RGB
-void rainbow(float value,float* R,float* G,float* B)
+ColorMap fire = ColorMap((char*)"Fire");
+ColorMap rainbow = ColorMap((char*)"Rainbow");
+
+void init_colormaps()
 {
-    const float dx=0.8;
-    if (value<0) value=0; if (value>1) value=1;
-    value = (6-2*dx)*value+dx;
-    *R = max(0.0,(3-fabs(value-4)-fabs(value-5))/2);
-    *G = max(0.0,(4-fabs(value-2)-fabs(value-4))/2);
-    *B = max(0.0,(3-fabs(value-1)-fabs(value-2))/2);
+    fire.add_color_range(Color(0,0,1), Color(1,1,1), 0, 0.8);
+    fire.add_color_range(Color(1,0,0), Color(1,0,0), 0.8, 10);
+
+    Color c(1,1,1);
+    c = fire.get_color(0);
+    c = fire.get_color(0.4);
+    c = fire.get_color(0.8);
+    c = fire.get_color(0.9);
+    c = fire.get_color(1);
+
 }
+
 
 //set_colormap: Sets three different types of colormaps
 void set_colormap(float vy)
 {
-    float R,G,B;
+    Color c;
+
+    if (clamp_flag) // considering that values on the simulation and visualization range 0-10
+    {
+        float out_min = 0, out_max = 10.0;
+        if (vy > clamp_max) vy = clamp_max;
+        if (vy < clamp_min) vy = clamp_min;
+        vy = (vy - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
+    }
 
     if (scalar_col==COLOR_BLACKWHITE)
-        R = G = B = vy;
+        c = Color(vy,vy,vy);
     else if (scalar_col==COLOR_RAINBOW)
-        rainbow(vy,&R,&G,&B);
+        c = rainbow.get_color(vy);
     else if (scalar_col==COLOR_BANDS)
     {
         const int NLEVELS = 7;
         vy *= NLEVELS; vy = (int)(vy); vy/= NLEVELS;
-        rainbow(vy,&R,&G,&B);
+        c = rainbow.get_color(vy);
     }
-    glColor3f(R,G,B);
+    glColor3f(c.r,c.g,c.b);
 }
 
 
@@ -48,22 +68,22 @@ void set_colormap(float vy)
 //                    using a rainbow colormap. If method==0, simply use the white color
 void direction_to_color(float x, float y, int method)
 {
-	float r,g,b,f;
-	if (method)
-	{
-	  f = atan2(y,x) / 3.1415927 + 1;
-	  r = f;
-	  if(r > 1) r = 2 - r;
-	  g = f + .66667;
-      if(g > 2) g -= 2;
-	  if(g > 1) g = 2 - g;
-	  b = f + 2 * .66667;
-	  if(b > 2) b -= 2;
-	  if(b > 1) b = 2 - b;
-	}
-	else
-	{ r = g = b = 1; }
-	glColor3f(r,g,b);
+    float r,g,b,f;
+    if (method)
+    {
+        f = atan2(y,x) / 3.1415927 + 1;
+        r = f;
+        if(r > 1) r = 2 - r;
+        g = f + .66667;
+        if(g > 2) g -= 2;
+        if(g > 1) g = 2 - g;
+        b = f + 2 * .66667;
+        if(b > 2) b -= 2;
+        if(b > 1) b = 2 - b;
+    }
+    else
+    { r = g = b = 1; }
+    glColor3f(r,g,b);
 }
 
 //visualize: This is the main visualization function

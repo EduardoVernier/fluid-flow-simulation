@@ -2,6 +2,8 @@
 //        the velocity field at the mouse location. Press the indicated keys to change options
 //--------------------------------------------------------------------------------------------------
 
+using namespace std;
+
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <stdio.h>              //for printing the help text
 #include <math.h>               //for various math functions
@@ -16,6 +18,7 @@
 #include "simulation.cpp"
 #include "visualization.cpp"
 #include "interaction.cpp"
+
 
 int main(int argc, char **argv)
 {
@@ -42,6 +45,7 @@ int main(int argc, char **argv)
 	glutKeyboardFunc(keyboard);
 	glutMotionFunc(drag);
 
+	init_colormaps();
 	init_simulation(DIM);	//initialize the simulation data structures
 	init_control_window();
 
