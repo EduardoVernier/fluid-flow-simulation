@@ -16,7 +16,8 @@ int frozen = 0;               //toggles on/off the animation
 
 int clamp_flag = 0;
 float clamp_min = 0, clamp_max = 10;
-
+int scaling_flag = 0;
+float scaling_min = 0, scaling_max = 10;
 
 ColorMap fire = ColorMap((char*)"Fire");
 ColorMap rainbow = ColorMap((char*)"Rainbow");
@@ -40,13 +41,17 @@ void init_colormaps()
 void set_colormap(float vy)
 {
     Color c;
+    float out_min = 0, out_max = 10.0; // considering that values on the simulation and visualization range 0-10
 
-    if (clamp_flag) // considering that values on the simulation and visualization range 0-10
+    if (clamp_flag)
     {
-        float out_min = 0, out_max = 10.0;
         if (vy > clamp_max) vy = clamp_max;
         if (vy < clamp_min) vy = clamp_min;
         vy = (vy - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
+    }
+    if (scaling_flag)
+    {
+        vy = (vy - scaling_min) * (out_max - out_min) / (scaling_max - scaling_min) + out_min;
     }
 
     if (scalar_col==COLOR_BLACKWHITE)
@@ -105,7 +110,7 @@ void visualize(void)
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
             idx = (j * DIM) + i;
-            glColor3f(rho[idx],rho[idx],rho[idx]);
+            set_colormap(rho[idx]);
             glVertex2f(px,py);
 
             for (i = 0; i < DIM - 1; i++)
