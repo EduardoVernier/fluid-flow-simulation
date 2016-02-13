@@ -21,6 +21,8 @@ GLUI_StaticText *dt_text;
 GLUI_StaticText *hh_text;
 GLUI_StaticText *visc_text;
 
+GLUI *glui;
+GLUI *cust_window;
 
 //display: Handle window redrawing events. Simply delegates to visualize().
 void display(void)
@@ -106,15 +108,51 @@ void update_variables_config_window()
     visc_text->set_text(buffer);
 }
 
-void resume (int t)
-{
-    frozen = 0;
-}
+void resume (int t){ frozen = t;}
 
+void add_range_to_custom_cm (int i)
+{
+    float *args = custom_color_ranges[i];
+    Color a = Color(args[0], args[1], args[2]);
+    Color b = Color(args[3], args[4], args[5]);
+
+    custom.add_color_range(a, b, args[6], args[7]);
+    cust_window->close();
+}
 
 void handle_custom_colormap()
 {
-    int cust_win = glutCreateWindow("Main gfx window");
+    cust_window = GLUI_Master.create_glui("Custom Dataset");
+
+    float *colormap_args = (float *) malloc(8*sizeof(float));
+    custom_color_ranges[custom_color_index] = colormap_args; //warning -> aliasing
+    for (int i = 0; i < 8; i++)
+        colormap_args[i] = 0.0;
+
+    cust_window->add_statictext("Color 1");
+    cust_window->add_edittext("R", GLUI_EDITTEXT_FLOAT, &colormap_args[0]);
+    cust_window->add_edittext("G", GLUI_EDITTEXT_FLOAT, &colormap_args[1]);
+    cust_window->add_edittext("B", GLUI_EDITTEXT_FLOAT, &colormap_args[2]);
+
+    cust_window->add_column(true);
+
+    cust_window->add_statictext("Color 2");
+    cust_window->add_edittext("R", GLUI_EDITTEXT_FLOAT, &colormap_args[3]);
+    cust_window->add_edittext("G", GLUI_EDITTEXT_FLOAT, &colormap_args[4]);
+    cust_window->add_edittext("B", GLUI_EDITTEXT_FLOAT, &colormap_args[5]);
+
+    cust_window->add_column(true);
+
+    cust_window->add_statictext("Interpolation Interval");
+    cust_window->add_edittext("Start", GLUI_EDITTEXT_FLOAT, &colormap_args[6]);
+    cust_window->add_edittext("End", GLUI_EDITTEXT_FLOAT, &colormap_args[7]);
+
+    new GLUI_Button(cust_window, "Add interpolation to colormap",
+                    custom_color_index, add_range_to_custom_cm);
+    custom_color_index++;
+
+    GLUI_Master.auto_set_viewport();
+    cust_window->set_main_gfx_window(main_window);
 }
 
 void control_cb(int control)
@@ -129,6 +167,8 @@ void control_cb(int control)
     else
     {
         frozen = 1;
+        glutTimerFunc(100, resume, 0);
+
         switch (control)
         {
         case DT_INCREASE_ID:
@@ -153,6 +193,7 @@ void control_cb(int control)
             exit(0);
             break;
         case CM_CUST_ID:
+            glutTimerFunc(100, resume, 1);
             handle_custom_colormap();
         case CM_BD_ID:
         case CM_RB_ID:
@@ -171,7 +212,6 @@ void control_cb(int control)
 
         glutPostRedisplay();
 
-        glutTimerFunc(100, resume, 0);
 
         //printf("dt: %.2f   Hedgehog Scale: %0.2f   Fluid Viscosity:%.5f \n", dt, vec_scale, visc);
     }
@@ -182,7 +222,7 @@ void control_cb(int control)
 void init_control_window()
 {
 
-    GLUI *glui = GLUI_Master.create_glui( "GLUI" );
+    glui = GLUI_Master.create_glui( "GLUI" );
 
     GLUI_Panel *simu_panel = new GLUI_Panel (glui, "Simulation Parameters");
 
@@ -214,10 +254,10 @@ void init_control_window()
 
 
     GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_panel, "Options", true);
-    glui->add_checkbox_to_panel(clamp_ro, "Clampling", &clamp_flag);
+    glui->add_checkbox_to_panel(clamp_ro, "Clampling", &clamp_flag, 0, control_cb);
     glui->add_edittext_to_panel(clamp_ro, "MIN", GLUI_EDITTEXT_FLOAT, &clamp_min);
     glui->add_edittext_to_panel(clamp_ro, "MAX", GLUI_EDITTEXT_FLOAT, &clamp_max);
-    glui->add_checkbox_to_panel(clamp_ro, "Scaling", &scaling_flag);
+    glui->add_checkbox_to_panel(clamp_ro, "Scaling", &scaling_flag, 0, control_cb);
 
 
     glui->add_checkbox_to_panel(upper_visu_panel, "Vector Field", &draw_vecs, 0, control_cb);

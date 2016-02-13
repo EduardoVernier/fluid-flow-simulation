@@ -21,7 +21,6 @@ int ColorMap::add_color_range(Color a, Color b, float x, float y)
 
 Color ColorMap::get_color(float value)
 {
-
     if (strcmp(this->name, "Rainbow") == 0)
     {
         return rainbow(value);
@@ -47,7 +46,6 @@ Color ColorMap::get_color(float value)
             }
         }
         return Color(0,0,0);
-
     }
 }
 

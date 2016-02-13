@@ -29,6 +29,10 @@ int dataset_id = DATASET_RHO;
 ColorMap fire = ColorMap((char*)"Fire");
 ColorMap rainbow = ColorMap((char*)"Rainbow");
 
+ColorMap custom = ColorMap((char*)"Custom");
+int custom_color_index = 0;
+float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 interpolations on a custom colormap
+
 void init_colormaps()
 {
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
@@ -71,7 +75,7 @@ void set_colormap(float vy)
         c = fire.get_color(vy);
         break;
     case COLOR_CUSTOM:
-        c = fire.get_color(vy*2);
+        c = custom.get_color(vy);
         break;
 
     }

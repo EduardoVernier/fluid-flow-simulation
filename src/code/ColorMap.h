@@ -10,6 +10,8 @@ using namespace std;
 
 #include "Color.cpp"
 
+extern float **custom_color_ranges;
+
 class ColorMap
 {
 public:
