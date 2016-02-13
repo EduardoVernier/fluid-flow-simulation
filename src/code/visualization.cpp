@@ -20,9 +20,10 @@ int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 
 int clamp_flag = 0;
-float clamp_min = 0, clamp_max = 10;
+float clamp_min = 0, clamp_max = 0.2;
+
 int scaling_flag = 0;
-float scaling_min = 0, scaling_max = 10;
+float dataset_min = 0, dataset_max = 10;
 
 int dataset_id = DATASET_RHO;
 
@@ -55,7 +56,7 @@ void set_colormap(float vy)
     }
     if (scaling_flag)
     {
-        vy = (vy - scaling_min) * (out_max - out_min) / (scaling_max - scaling_min) + out_min;
+        vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
     }
 
     int NLEVELS = 7;
@@ -120,6 +121,8 @@ void visualize(void)
         dataset = rho;
     else if (dataset_id == DATASET_VELOCITY)
         dataset = v_mag;
+    else if (dataset_id == DATASET_FORCE)
+        dataset = f_mag;
 
 
     if (draw_smoke)
