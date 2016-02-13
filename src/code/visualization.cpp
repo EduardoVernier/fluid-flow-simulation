@@ -4,12 +4,17 @@
 #define COLOR_BLACKWHITE 100   //different types of color mapping: black-and-white, rainbow, banded
 #define COLOR_RAINBOW 101
 #define COLOR_BANDS 102
+#define COLOR_FIRE 103
+#define COLOR_CUSTOM 104
+#define DATASET_RHO 150
+#define DATASET_VELOCITY 151
+#define DATASET_FORCE 152
 
 int main_window;				//set
 int winWidth, winHeight;      //size of the graphics window, in pixels
 int color_dir = 0;            //use direction color-coding or not
 float vec_scale = 1000;			//scaling of hedgehogs
-int draw_smoke = 0;           //draw the smoke or not
+int draw_smoke = 1;           //draw the smoke or not
 int draw_vecs = 1;            //draw the vector field or not
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
@@ -19,21 +24,16 @@ float clamp_min = 0, clamp_max = 10;
 int scaling_flag = 0;
 float scaling_min = 0, scaling_max = 10;
 
+int dataset_id = DATASET_RHO;
+
 ColorMap fire = ColorMap((char*)"Fire");
 ColorMap rainbow = ColorMap((char*)"Rainbow");
 
 void init_colormaps()
 {
-    fire.add_color_range(Color(0,0,1), Color(1,1,1), 0, 0.8);
-    fire.add_color_range(Color(1,0,0), Color(1,0,0), 0.8, 10);
-
-    Color c(1,1,1);
-    c = fire.get_color(0);
-    c = fire.get_color(0.4);
-    c = fire.get_color(0.8);
-    c = fire.get_color(0.9);
-    c = fire.get_color(1);
-
+    fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
+    fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
+    fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
 }
 
 
@@ -54,16 +54,28 @@ void set_colormap(float vy)
         vy = (vy - scaling_min) * (out_max - out_min) / (scaling_max - scaling_min) + out_min;
     }
 
-    if (scalar_col==COLOR_BLACKWHITE)
-        c = Color(vy,vy,vy);
-    else if (scalar_col==COLOR_RAINBOW)
-        c = rainbow.get_color(vy);
-    else if (scalar_col==COLOR_BANDS)
+    int NLEVELS = 7;
+    switch(scalar_col)
     {
-        const int NLEVELS = 7;
+    case COLOR_BLACKWHITE:
+        c = Color(vy,vy,vy);
+        break;
+    case COLOR_RAINBOW:
+        c = rainbow.get_color(vy);
+        break;
+    case COLOR_BANDS:
         vy *= NLEVELS; vy = (int)(vy); vy/= NLEVELS;
         c = rainbow.get_color(vy);
+        break;
+    case COLOR_FIRE:
+        c = fire.get_color(vy);
+        break;
+    case COLOR_CUSTOM:
+        c = fire.get_color(vy*2);
+        break;
+
     }
+
     glColor3f(c.r,c.g,c.b);
 }
 
@@ -99,6 +111,13 @@ void visualize(void)
     fftw_real wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
 
+    fftw_real *dataset;
+    if (dataset_id == DATASET_RHO)
+        dataset = rho;
+    else if (dataset_id == DATASET_VELOCITY)
+        dataset = v_mag;
+
+
     if (draw_smoke)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -110,7 +129,7 @@ void visualize(void)
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
             idx = (j * DIM) + i;
-            set_colormap(rho[idx]);
+            set_colormap(dataset[idx]);
             glVertex2f(px,py);
 
             for (i = 0; i < DIM - 1; i++)
@@ -118,19 +137,19 @@ void visualize(void)
                 px = wn + (fftw_real)i * wn;
                 py = hn + (fftw_real)(j + 1) * hn;
                 idx = ((j + 1) * DIM) + i;
-                set_colormap(rho[idx]);
+                set_colormap(dataset[idx]);
                 glVertex2f(px, py);
                 px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
                 idx = (j * DIM) + (i + 1);
-                set_colormap(rho[idx]);
+                set_colormap(dataset[idx]);
                 glVertex2f(px, py);
             }
 
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
-            set_colormap(rho[idx]);
+            set_colormap(dataset[idx]);
             glVertex2f(px, py);
 
             glEnd();

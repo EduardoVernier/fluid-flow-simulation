@@ -1,6 +1,11 @@
 #define CM_BW_ID 100
 #define CM_RB_ID 101
 #define CM_BD_ID 102
+#define CM_FIRE_ID 103
+#define CM_CUST_ID 104
+#define DS_RHO_ID 150
+#define DS_VELOC_ID 151
+#define DS_FORCE_ID 152
 #define DT_INCREASE_ID 200
 #define DT_DECREASE_ID 201
 #define HH_INCREASE_ID 202
@@ -106,6 +111,12 @@ void resume (int t)
     frozen = 0;
 }
 
+
+void handle_custom_colormap()
+{
+    int cust_win = glutCreateWindow("Main gfx window");
+}
+
 void control_cb(int control)
 {
     // In order to glut have enough time to render the config window
@@ -141,12 +152,19 @@ void control_cb(int control)
         case QT_ID:
             exit(0);
             break;
+        case CM_CUST_ID:
+            handle_custom_colormap();
         case CM_BD_ID:
         case CM_RB_ID:
         case CM_BW_ID:
+        case CM_FIRE_ID:
             scalar_col = control;
             break;
-
+        case DS_RHO_ID:
+        case DS_VELOC_ID:
+        case DS_FORCE_ID:
+            dataset_id = control;
+            break;
         }
 
         update_variables_config_window();
@@ -155,7 +173,7 @@ void control_cb(int control)
 
         glutTimerFunc(100, resume, 0);
 
-        printf("dt: %.2f   Hedgehog Scale: %0.2f   Fluid Viscosity:%.5f \n", dt, vec_scale, visc);
+        //printf("dt: %.2f   Hedgehog Scale: %0.2f   Fluid Viscosity:%.5f \n", dt, vec_scale, visc);
     }
 }
 
@@ -166,38 +184,52 @@ void init_control_window()
 
     GLUI *glui = GLUI_Master.create_glui( "GLUI" );
 
-    glui->add_checkbox( "Matter", &draw_smoke, 0, control_cb);
-    glui->add_checkbox( "Vector Field", &draw_vecs, 0, control_cb);
-    glui->add_checkbox( "Direction Coloring", &color_dir, 0, control_cb);
-    glui->add_checkbox( "Thru Scalar Coloring", &color_dir, 0, control_cb);
+    GLUI_Panel *simu_panel = new GLUI_Panel (glui, "Simulation Parameters");
 
-    GLUI_Panel *dt_panel = new GLUI_Panel (glui, "Time Step");
+    GLUI_Panel *dt_panel = new GLUI_Panel (simu_panel, "Time Step");
     dt_text = glui->add_statictext_to_panel(dt_panel, "");
     new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb);
     new GLUI_Button(dt_panel, "Decrease", DT_DECREASE_ID, control_cb);
 
-    GLUI_Panel *hedgehog_panel = new GLUI_Panel (glui, "Hedgehog Scaling");
-    hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
-    new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
-    new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
-
-    GLUI_Panel *visc_panel = new GLUI_Panel (glui, "Fluid Viscosity");
+    GLUI_Panel *visc_panel = new GLUI_Panel (simu_panel, "Fluid Viscosity");
     visc_text = glui->add_statictext_to_panel(visc_panel, "");
-
     new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb);
     new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb);
 
-    GLUI_Panel *color_panel = new GLUI_Panel (glui, "Color Mapping");
+    GLUI_Panel *upper_visu_panel = new GLUI_Panel(glui, "Visualization Paramenters");
+    glui->add_checkbox_to_panel(upper_visu_panel, "Display Matter", &draw_smoke, 0, control_cb);
+    GLUI_Panel *matter_panel = new GLUI_Panel(upper_visu_panel, "");
+
+    GLUI_Panel *dataset_panel = new GLUI_Panel (matter_panel, "Dataset Selection");
+    new GLUI_Button(dataset_panel, "Fluid Density", DS_RHO_ID, control_cb);
+    new GLUI_Button(dataset_panel, "Fluid Velocity Magnitude", DS_VELOC_ID, control_cb);
+    new GLUI_Button(dataset_panel, "Force Field Magnitude", DS_FORCE_ID, control_cb);
+
+    GLUI_Panel *color_panel = new GLUI_Panel (matter_panel, "Color Mapping");
     new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);
     new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb);
     new GLUI_Button(color_panel, "Banded", CM_BD_ID, control_cb);
+    new GLUI_Button(color_panel, "Fire", CM_FIRE_ID, control_cb);
+    new GLUI_Button(color_panel, "Custom", CM_CUST_ID, control_cb);
 
-    GLUI_Panel *clamp_ro = glui->add_panel_to_panel(color_panel, "Options", true);
-    glui->add_checkbox_to_panel(clamp_ro, "Clampling", &clamp_flag, 0, control_cb);
-    glui->add_edittext_to_panel(clamp_ro, "MIN", GLUI_EDITTEXT_FLOAT, &clamp_min, 0, control_cb);
-    glui->add_edittext_to_panel(clamp_ro, "MAX", GLUI_EDITTEXT_FLOAT, &clamp_max, 0, control_cb);
-    glui->add_checkbox_to_panel(clamp_ro, "Scaling", &scaling_flag, 0, control_cb);
 
+    GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_panel, "Options", true);
+    glui->add_checkbox_to_panel(clamp_ro, "Clampling", &clamp_flag);
+    glui->add_edittext_to_panel(clamp_ro, "MIN", GLUI_EDITTEXT_FLOAT, &clamp_min);
+    glui->add_edittext_to_panel(clamp_ro, "MAX", GLUI_EDITTEXT_FLOAT, &clamp_max);
+    glui->add_checkbox_to_panel(clamp_ro, "Scaling", &scaling_flag);
+
+
+    glui->add_checkbox_to_panel(upper_visu_panel, "Vector Field", &draw_vecs, 0, control_cb);
+    GLUI_Panel *vector_panel = new GLUI_Panel(upper_visu_panel, "");
+
+    glui->add_checkbox_to_panel(vector_panel, "Direction Coloring", &color_dir, 0, control_cb);
+    glui->add_checkbox_to_panel(vector_panel, "Thru Scalar Coloring", &color_dir, 0, control_cb);
+
+    GLUI_Panel *hedgehog_panel = new GLUI_Panel (vector_panel, "Hedgehog Scaling");
+    hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
+    new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
+    new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);

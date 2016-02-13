@@ -3,6 +3,7 @@ const int DIM = 50;				//size of simulation grid
 float dt = 0.4;				//simulation time step
 float visc = 0.001;				//fluid viscosity
 fftw_real *vx, *vy;             //(vx,vy)   = velocity field at the current moment
+fftw_real *v_mag;               //vector that stores velocity magnitude dataset
 fftw_real *vx0, *vy0;           //(vx0,vy0) = velocity field at the previous moment
 fftw_real *fx, *fy;	            //(fx,fy)   = user-controlled simulation forces, steered with the mouse
 fftw_real *rho, *rho0;			//smoke density at the current (rho) and previous (rho0) moment
@@ -22,6 +23,7 @@ void init_simulation(int n)
 	dim     = n * 2*(n/2+1)*sizeof(fftw_real);        //Allocate data structures
 	vx       = (fftw_real*) malloc(dim);
 	vy       = (fftw_real*) malloc(dim);
+    v_mag    = (fftw_real*) malloc(dim);
 	vx0      = (fftw_real*) malloc(dim);
 	vy0      = (fftw_real*) malloc(dim);
 	dim     = n * n * sizeof(fftw_real);
@@ -34,7 +36,7 @@ void init_simulation(int n)
 
 	for (i = 0; i < n * n; i++)                      //Initialize data structures to 0
 	{
-		vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = 0.0f;
+        vx[i] = vy[i] = v_mag[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = 0.0f;
 	}
 }
 
@@ -140,6 +142,8 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
 	for ( x=0.5f/n,i=0 ; i<n ; i++,x+=1.0f/n )
 		for ( y=0.5f/n,j=0 ; j<n ; j++,y+=1.0f/n )
 		{
+            // Calculate velocity vector magnitude
+            v_mag[i+n*j] = sqrt (vx[i+n*j]*vx[i+n*j] + vy[i+n*j]*vy[i+n*j]);
 			x0 = n*(x-dt*vx[i+n*j])-0.5f;
 			y0 = n*(y-dt*vy[i+n*j])-0.5f;
 			i0 = clamp(x0);
