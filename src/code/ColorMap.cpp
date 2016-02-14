@@ -32,6 +32,7 @@ Color ColorMap::get_color(float value)
     else
     {
         float x, y;
+        Color c = Color(0,0,0);
         for (unsigned it = 0; it < color_ranges.size(); ++it)
         {
             Color a = get<0>(color_ranges[it]);
@@ -41,11 +42,10 @@ Color ColorMap::get_color(float value)
 
             if (value >= x && value <= y)
             {
-                Color c = interpolate(a, b, (value - x)/(y - x));
-                return c;
+                c = interpolate(a, b, (value - x)/(y - x));
             }
         }
-        return Color(0,0,0);
+        return c;
     }
 }
 

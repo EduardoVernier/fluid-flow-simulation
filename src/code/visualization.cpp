@@ -108,6 +108,49 @@ void direction_to_color(float x, float y, int method)
 }
 
 
+void draw_colormap()
+{
+    double n_samples = 256;
+
+    for (int i = 0; i < n_samples; i++)
+    {
+        double c_min = 0;
+        double c_max = 10;
+        if (clamp_flag)
+        {
+            c_max = clamp_max;
+            c_min = clamp_min;
+        }
+
+        double current_value = c_min + (i/n_samples)*(c_max-c_min);
+        set_colormap(current_value);
+        glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
+                0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
+
+        if(i % ((int)n_samples/10) == 0)
+        {
+            glColor3f(1,1,1);
+            std::string str = std::to_string(current_value);
+            glMatrixMode( GL_MODELVIEW );
+            glPushMatrix();
+            glLoadIdentity();
+            glRasterPos2i( 0.96*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
+            for (unsigned j = 0; j < str.length(); ++j )
+            {
+                glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, str[j]);
+            }
+            glPopMatrix();
+
+            glMatrixMode( GL_PROJECTION );
+            glPopMatrix();
+            glMatrixMode( GL_MODELVIEW );
+
+        }
+    }
+
+
+}
+
 //visualize: This is the main visualization function
 void visualize(void)
 {
@@ -166,22 +209,17 @@ void visualize(void)
     {
         glBegin(GL_LINES);				//draw velocities
         for (i = 0; i < DIM; i++)
-        for (j = 0; j < DIM; j++)
-        {
-            idx = (j * DIM) + i;
-            direction_to_color(vx[idx],vy[idx],color_dir);
-            glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
-            glVertex2f((wn + (fftw_real)i * wn) + vec_scale * vx[idx], (hn + (fftw_real)j * hn) + vec_scale * vy[idx]);
-        }
+            for (j = 0; j < DIM; j++)
+            {
+                idx = (j * DIM) + i;
+                direction_to_color(vx[idx],vy[idx],color_dir);
+                glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
+                glVertex2f((wn + (fftw_real)i * wn) + vec_scale * vx[idx], (hn + (fftw_real)j * hn) + vec_scale * vy[idx]);
+            }
         glEnd();
     }
 
     // draw colormap
-    for (int i = 0; i < 200; i++)
-    {
-        set_colormap(i/20.0);
-        glRectd(0.9*winWidth, i*((winHeight)/200)+5, 0.95*winWidth, (i+1)*((winHeight)/200)+5);
-    }
-
+    draw_colormap();
 
 }

@@ -113,10 +113,12 @@ void resume (int t){ frozen = t;}
 void add_range_to_custom_cm (int i)
 {
     float *args = custom_color_ranges[i];
+
     Color a = Color(args[0], args[1], args[2]);
     Color b = Color(args[3], args[4], args[5]);
 
     custom.add_color_range(a, b, args[6], args[7]);
+    resume(0);
     cust_window->close();
 }
 
