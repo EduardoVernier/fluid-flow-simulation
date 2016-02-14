@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(500,500);
+    glutInitWindowSize(900,600);
 	main_window = glutCreateWindow("Real-time smoke simulation and visualization");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);

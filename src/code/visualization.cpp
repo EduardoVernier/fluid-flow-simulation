@@ -15,7 +15,7 @@ int winWidth, winHeight;      //size of the graphics window, in pixels
 int color_dir = 0;            //use direction color-coding or not
 float vec_scale = 1000;			//scaling of hedgehogs
 int draw_smoke = 1;           //draw the smoke or not
-int draw_vecs = 1;            //draw the vector field or not
+int draw_vecs = 0;            //draw the vector field or not
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 
@@ -78,7 +78,6 @@ void set_colormap(float vy)
     case COLOR_CUSTOM:
         c = custom.get_color(vy);
         break;
-
     }
 
     glColor3f(c.r,c.g,c.b);
@@ -108,13 +107,14 @@ void direction_to_color(float x, float y, int method)
     glColor3f(r,g,b);
 }
 
+
 //visualize: This is the main visualization function
 void visualize(void)
 {
     int i, j, idx;
     double px,py;
-    fftw_real wn = (fftw_real)winWidth / (fftw_real)(DIM + 1);   // Grid cell width
-    fftw_real hn = (fftw_real)winHeight / (fftw_real)(DIM + 1);  // Grid cell heigh
+    fftw_real wn = (fftw_real)(winWidth*0.9) / (fftw_real)(DIM + 1);   // Grid cell width
+    fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
     fftw_real *dataset;
     if (dataset_id == DATASET_RHO)
@@ -123,7 +123,6 @@ void visualize(void)
         dataset = v_mag;
     else if (dataset_id == DATASET_FORCE)
         dataset = f_mag;
-
 
     if (draw_smoke)
     {
@@ -176,5 +175,13 @@ void visualize(void)
         }
         glEnd();
     }
+
+    // draw colormap
+    for (int i = 0; i < 200; i++)
+    {
+        set_colormap(i/20.0);
+        glRectd(0.9*winWidth, i*((winHeight)/200)+5, 0.95*winWidth, (i+1)*((winHeight)/200)+5);
+    }
+
 
 }

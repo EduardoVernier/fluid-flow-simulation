@@ -3,7 +3,7 @@
 #define DATASET_FORCE 152
 
 const int DIM = 50;				//size of simulation grid
-float dt = 0.4;				//simulation time step
+float dt = 0.4;                 //simulation time step
 float visc = 0.001;				//fluid viscosity
 fftw_real *vx, *vy;             //(vx,vy)   = velocity field at the current moment
 fftw_real *v_mag;               //vector that stores velocity magnitude dataset
@@ -26,24 +26,23 @@ void init_simulation(int n)
 	int i; size_t dim;
 
 	dim     = n * 2*(n/2+1)*sizeof(fftw_real);        //Allocate data structures
-	vx       = (fftw_real*) malloc(dim);
-	vy       = (fftw_real*) malloc(dim);
-    v_mag    = (fftw_real*) malloc(dim);
-	vx0      = (fftw_real*) malloc(dim);
-	vy0      = (fftw_real*) malloc(dim);
-	dim     = n * n * sizeof(fftw_real);
+    vx      = (fftw_real*) malloc(dim);
+    vy      = (fftw_real*) malloc(dim);
+    v_mag   = (fftw_real*) malloc(dim);
+    vx0     = (fftw_real*) malloc(dim);
+    vy0     = (fftw_real*) malloc(dim);
+    dim     = n * n * sizeof(fftw_real);
 	fx      = (fftw_real*) malloc(dim);
 	fy      = (fftw_real*) malloc(dim);
-    f_mag      = (fftw_real*) malloc(dim);
+    f_mag   = (fftw_real*) malloc(dim);
     rho     = (fftw_real*) malloc(dim);
 	rho0    = (fftw_real*) malloc(dim);
 	plan_rc = rfftw2d_create_plan(n, n, FFTW_REAL_TO_COMPLEX, FFTW_IN_PLACE);
 	plan_cr = rfftw2d_create_plan(n, n, FFTW_COMPLEX_TO_REAL, FFTW_IN_PLACE);
 
 	for (i = 0; i < n * n; i++)                      //Initialize data structures to 0
-	{
         vx[i] = vy[i] = v_mag[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = f_mag[i] = rho[i] = rho0[i] = 0.0f;
-	}
+
 }
 
 
@@ -179,7 +178,7 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
     // set values used if scaling is on
     dataset_max = max_ds;
     dataset_min = min_ds;
-    printf ("%f  %f\n", min_ds, max_ds);
+    //printf ("%f  %f\n", min_ds, max_ds);
 }
 
 //set_forces: copy user-controlled forces to the force vectors that are sent to the solver.
