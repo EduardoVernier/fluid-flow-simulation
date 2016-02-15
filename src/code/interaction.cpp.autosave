@@ -261,6 +261,9 @@ void init_control_window()
 
     glui->add_checkbox_to_panel(upper_visu_panel, "Vector Field", &draw_vecs, 0, control_cb);
     GLUI_Panel *vector_panel = new GLUI_Panel(upper_visu_panel, "");
+    
+    
+    
 
     glui->add_checkbox_to_panel(vector_panel, "Direction Coloring", &color_dir, 0, control_cb);
     glui->add_checkbox_to_panel(vector_panel, "Thru Scalar Coloring", &color_dir, 0, control_cb);

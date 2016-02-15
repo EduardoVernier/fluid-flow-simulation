@@ -51,7 +51,7 @@ GLUI_LIB = lib/libglui.a
 
 GLUI_EXAMPLES = bin/main
 
-CLASSES = code/Color.cpp code/ColorMap.cpp # bin/example2 bin/example3 bin/example4 bin/example5 bin/example6
+CLASSES = code/Color.cpp code/ColorMap.cpp code/Glyphs.cpp
 
 GLUI_TOOLS = bin/ppm2array
 

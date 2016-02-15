@@ -1,5 +1,6 @@
 #include "Color.cpp"
 #include "ColorMap.h"
+#include "Glyphs.h"
 
 #define COLOR_BLACKWHITE 100   //different types of color mapping: black-and-white, rainbow, banded
 #define COLOR_RAINBOW 101
@@ -19,6 +20,9 @@ int draw_vecs = 0;            //draw the vector field or not
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 
+double colormap_min = 0;
+double colormap_max = 1;
+
 int clamp_flag = 0;
 float clamp_min = 0, clamp_max = 0.2;
 
@@ -34,6 +38,8 @@ ColorMap custom = ColorMap((char*)"Custom");
 int custom_color_index = 0;
 float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 interpolations on a custom colormap
 
+Glyphs glyphs = Glyphs();
+
 void init_colormaps()
 {
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
@@ -46,7 +52,7 @@ void init_colormaps()
 void set_colormap(float vy)
 {
     Color c;
-    float out_min = 0, out_max = 10.0; // considering that values on the simulation and visualization range 0-10
+    float out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
 
     if (clamp_flag)
     {
@@ -84,6 +90,51 @@ void set_colormap(float vy)
 }
 
 
+void draw_colormap()
+{
+    double n_samples = 256;
+
+    for (int i = 0; i < n_samples; i++)
+    {
+        if (clamp_flag)
+        {
+            colormap_max = clamp_max;
+            colormap_min = clamp_min;
+        }
+        else
+        {
+            colormap_max = 1.1;
+            colormap_min = 0;
+        }
+
+        double current_value = colormap_min + (i/n_samples)*(colormap_max-colormap_min);
+        set_colormap(current_value);
+        glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
+                0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
+
+        if(i % ((int)n_samples/10) == 0)
+        {
+            glColor3f(1,1,1);
+            std::string str = std::to_string(current_value);
+            glMatrixMode( GL_MODELVIEW );
+            glPushMatrix();
+            glLoadIdentity();
+            glRasterPos2i( 0.96*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
+            for (unsigned j = 0; j < 4; ++j ) //only first 4 characters
+            {
+                glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[j]);
+            }
+            glPopMatrix();
+
+            glMatrixMode( GL_PROJECTION );
+            glPopMatrix();
+            glMatrixMode( GL_MODELVIEW );
+
+        }
+    }
+}
+
+
 //direction_to_color: Set the current color by mapping a direction vector (x,y), using
 //                    the color mapping method 'method'. If method==1, map the vector direction
 //                    using a rainbow colormap. If method==0, simply use the white color
@@ -107,48 +158,22 @@ void direction_to_color(float x, float y, int method)
     glColor3f(r,g,b);
 }
 
-
-void draw_colormap()
+void draw_glyphs()
 {
-    double n_samples = 256;
+    int i, j, idx;
+    fftw_real wn = (fftw_real)(winWidth*0.9) / (fftw_real)(DIM + 1);   // Grid cell width
+    fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
-    for (int i = 0; i < n_samples; i++)
-    {
-        double c_min = 0;
-        double c_max = 10;
-        if (clamp_flag)
+    glBegin(GL_LINES);
+    for (i = 0; i < DIM; i++)
+        for (j = 0; j < DIM; j++)
         {
-            c_max = clamp_max;
-            c_min = clamp_min;
+            idx = (j * DIM) + i;
+            direction_to_color(vx[idx],vy[idx],color_dir);
+            glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
+            glVertex2f((wn + (fftw_real)i * wn) + vec_scale * vx[idx], (hn + (fftw_real)j * hn) + vec_scale * vy[idx]);
         }
-
-        double current_value = c_min + (i/n_samples)*(c_max-c_min);
-        set_colormap(current_value);
-        glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
-                0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
-
-        if(i % ((int)n_samples/10) == 0)
-        {
-            glColor3f(1,1,1);
-            std::string str = std::to_string(current_value);
-            glMatrixMode( GL_MODELVIEW );
-            glPushMatrix();
-            glLoadIdentity();
-            glRasterPos2i( 0.96*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
-            for (unsigned j = 0; j < str.length(); ++j )
-            {
-                glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, str[j]);
-            }
-            glPopMatrix();
-
-            glMatrixMode( GL_PROJECTION );
-            glPopMatrix();
-            glMatrixMode( GL_MODELVIEW );
-
-        }
-    }
-
-
+    glEnd();
 }
 
 //visualize: This is the main visualization function
@@ -206,18 +231,7 @@ void visualize(void)
     }
 
     if (draw_vecs)
-    {
-        glBegin(GL_LINES);				//draw velocities
-        for (i = 0; i < DIM; i++)
-            for (j = 0; j < DIM; j++)
-            {
-                idx = (j * DIM) + i;
-                direction_to_color(vx[idx],vy[idx],color_dir);
-                glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
-                glVertex2f((wn + (fftw_real)i * wn) + vec_scale * vx[idx], (hn + (fftw_real)j * hn) + vec_scale * vy[idx]);
-            }
-        glEnd();
-    }
+        draw_glyphs();
 
     // draw colormap
     draw_colormap();

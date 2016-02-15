@@ -1004,3 +1004,5 @@ src/code/interaction.cpp
 src/code/main.cpp
 src/code/simulation.cpp
 src/code/visualization.cpp
+src/code/Glyphs.h
+src/code/Glyphs.cpp
