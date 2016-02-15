@@ -19,15 +19,16 @@ int draw_smoke = 1;           //draw the smoke or not
 int draw_vecs = 0;            //draw the vector field or not
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
-
-double colormap_min = 0;
-double colormap_max = 1;
+int quantize_colormap = 0;
 
 int clamp_flag = 0;
 float clamp_min = 0, clamp_max = 0.2;
 
 int scaling_flag = 0;
 float dataset_min = 0, dataset_max = 10;
+
+double colorbar_min = 0;
+double colorbar_max = 1;
 
 int dataset_id = DATASET_RHO;
 
@@ -58,6 +59,7 @@ void set_colormap(float vy)
     {
         if (vy > clamp_max) vy = clamp_max;
         if (vy < clamp_min) vy = clamp_min;
+        // map interval clamp_min - clamp_max -> out_min - out_max
         vy = (vy - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
     }
     if (scaling_flag)
@@ -65,17 +67,21 @@ void set_colormap(float vy)
         vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
     }
 
-    int NLEVELS = 7;
+    glShadeModel(GL_SMOOTH);
+    if(quantize_colormap != 0)
+    {
+        glShadeModel(GL_FLAT);
+        vy *= quantize_colormap;
+        vy = (int)(vy);
+        vy/= quantize_colormap;
+    }
+
     switch(scalar_col)
     {
     case COLOR_BLACKWHITE:
         c = Color(vy,vy,vy);
         break;
     case COLOR_RAINBOW:
-        c = rainbow.get_color(vy);
-        break;
-    case COLOR_BANDS:
-        vy *= NLEVELS; vy = (int)(vy); vy/= NLEVELS;
         c = rainbow.get_color(vy);
         break;
     case COLOR_FIRE:
@@ -98,16 +104,17 @@ void draw_colormap()
     {
         if (clamp_flag)
         {
-            colormap_max = clamp_max;
-            colormap_min = clamp_min;
+            colorbar_max = clamp_max;
+            colorbar_min = clamp_min;
         }
         else
         {
-            colormap_max = 1.1;
-            colormap_min = 0;
+            colorbar_max = 1;
+            colorbar_min = 0;
         }
+        colorbar_max *=1.1;
 
-        double current_value = colormap_min + (i/n_samples)*(colormap_max-colormap_min);
+        double current_value = colorbar_min + (i/n_samples)*(colorbar_max-colorbar_min);
         set_colormap(current_value);
         glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
                 0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);

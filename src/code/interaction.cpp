@@ -16,6 +16,7 @@
 #define QT_ID 207
 #define CLAMPING_ID 208
 #define SCALING_ID 209
+#define QUANT_ID 210
 
 GLUI_StaticText *dt_text;
 GLUI_StaticText *hh_text;
@@ -203,6 +204,8 @@ void control_cb(int control)
         case CM_FIRE_ID:
             scalar_col = control;
             break;
+        case QUANT_ID:
+            break;
         }
 
         update_variables_config_window();
@@ -228,6 +231,8 @@ void init_control_window()
     new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb);
     new GLUI_Button(dt_panel, "Decrease", DT_DECREASE_ID, control_cb);
 
+    glui->add_column_to_panel(simu_panel, false);
+
     GLUI_Panel *visc_panel = new GLUI_Panel (simu_panel, "Fluid Viscosity");
     visc_text = glui->add_statictext_to_panel(visc_panel, "");
     new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb);
@@ -247,9 +252,10 @@ void init_control_window()
     GLUI_Panel *color_panel = new GLUI_Panel (matter_panel, "Color Mapping");
     new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);
     new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb);
-    new GLUI_Button(color_panel, "Banded", CM_BD_ID, control_cb);
     new GLUI_Button(color_panel, "Fire", CM_FIRE_ID, control_cb);
     new GLUI_Button(color_panel, "Custom", CM_CUST_ID, control_cb);
+    glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap);
+
 
 
     GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_panel, "Options", true);
