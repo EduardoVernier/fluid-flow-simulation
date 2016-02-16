@@ -1,11 +1,22 @@
+// colormap button ids
 #define CM_BW_ID 100
 #define CM_RB_ID 101
 #define CM_BD_ID 102
 #define CM_FIRE_ID 103
 #define CM_CUST_ID 104
-#define DS_RHO_ID 150
-#define DS_VELOC_ID 151
-#define DS_FORCE_ID 152
+// scalar field selector id on listbox
+#define SF_RHO_ID 150
+#define SF_VELOC_ID 151
+#define SF_FORCE_ID 152
+#define SF_DIR_ID 162
+#define SF_WHITE_ID 163
+// vector fields ids
+#define VF_VELOC_ID 160
+#define VF_FORCE_ID 161
+// glyph type ids
+#define GLYPH_LINE 170
+#define GLYPH_TRI 171
+// button/checkbox/listbox ids
 #define DT_INCREASE_ID 200
 #define DT_DECREASE_ID 201
 #define HH_INCREASE_ID 202
@@ -18,10 +29,13 @@
 #define SCALING_ID 209
 #define QUANT_ID 210
 
+// statictext objects pointers are global because control_cb callback
+// function can't handle arguments except int values
 GLUI_StaticText *dt_text;
 GLUI_StaticText *hh_text;
 GLUI_StaticText *visc_text;
 
+// parameters window and custom colormap window global pointers
 GLUI *glui;
 GLUI *cust_window;
 
@@ -59,9 +73,9 @@ void keyboard(unsigned char key, int x, int y)
     case 'V': visc *= 5; break;
     case 'v': visc *= 0.2; break;
     case 'x': draw_smoke = 1 - draw_smoke;
-        if (draw_smoke==0) draw_vecs = 1; break;
-    case 'y': draw_vecs = 1 - draw_vecs;
-        if (draw_vecs==0) draw_smoke = 1; break;
+        if (draw_smoke==0) draw_glyphs_flag = 1; break;
+    case 'y': draw_glyphs_flag = 1 - draw_glyphs_flag;
+        if (draw_glyphs_flag==0) draw_smoke = 1; break;
     case 'm': scalar_col++; if (scalar_col>COLOR_BANDS) scalar_col=COLOR_BLACKWHITE; break;
     case 'a': frozen = 1-frozen; break;
     case 'q': exit(0);
@@ -97,20 +111,25 @@ void drag(int mx, int my)
     lmx = mx; lmy = my;
 }
 
+// update_variables_config_window: Used to write on the statictext values
 void update_variables_config_window()
 {
     // Update variable values on the config window
     char buffer[50];
     sprintf(buffer, "= %.2f", dt);
     dt_text->set_text(buffer);
-    sprintf(buffer, "= %.2f", vec_scale);
-    hh_text->set_text(buffer);
+    //sprintf(buffer, "= %.2f", vec_scale);
+    //hh_text->set_text(buffer);
     sprintf(buffer, "= %.6f", visc);
     visc_text->set_text(buffer);
 }
 
+// resume: Unfortunate solution to rendering glui windows
 void resume (int t){ frozen = t;}
 
+// add_range_to_custom_cm: Takes an index i that corresponds to the possition on
+//                         the custom_color_ranges global variable and sets it's values
+//                         to the custom colormap;
 void add_range_to_custom_cm (int i)
 {
     float *args = custom_color_ranges[i];
@@ -123,6 +142,7 @@ void add_range_to_custom_cm (int i)
     cust_window->close();
 }
 
+// handle_custom_colormap: Deals with the custom colormap window
 void handle_custom_colormap()
 {
     cust_window = GLUI_Master.create_glui("Custom Dataset");
@@ -158,10 +178,11 @@ void handle_custom_colormap()
     cust_window->set_main_gfx_window(main_window);
 }
 
+// control_cb: Takes (almost) all callbacks from buttons, checkboxes, etc.
 void control_cb(int control)
 {
     // In order to glut have enough time to render the config window
-    // the program needs to be frozen for 100ms so the second window
+    // the program needs to be frozen for 100ms so the config window
     // becomes target of the display function instead of the main
     if (control == PP_ID)
     {
@@ -209,21 +230,18 @@ void control_cb(int control)
         }
 
         update_variables_config_window();
-
         glutPostRedisplay();
-
-
         //printf("dt: %.2f   Hedgehog Scale: %0.2f   Fluid Viscosity:%.5f \n", dt, vec_scale, visc);
     }
 }
 
-
-
+// init_control_window: Creates and configures UI elements
 void init_control_window()
 {
 
     glui = GLUI_Master.create_glui( "GLUI" );
 
+    // Simulation Parameters
     GLUI_Panel *simu_panel = new GLUI_Panel (glui, "Simulation Parameters");
 
     GLUI_Panel *dt_panel = new GLUI_Panel (simu_panel, "Time Step");
@@ -238,16 +256,16 @@ void init_control_window()
     new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb);
     new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb);
 
+    // Matter Parameters
     GLUI_Panel *upper_visu_panel = new GLUI_Panel(glui, "Visualization Paramenters");
     glui->add_checkbox_to_panel(upper_visu_panel, "Display Matter", &draw_smoke, 0, control_cb);
     GLUI_Panel *matter_panel = new GLUI_Panel(upper_visu_panel, "");
 
     GLUI_Panel *dataset_panel = new GLUI_Panel (matter_panel, "Dataset Selection");
     GLUI_Listbox *matter_dataset_lb = glui->add_listbox_to_panel(dataset_panel, "", &dataset_id);
-    matter_dataset_lb->add_item(DS_RHO_ID, "Fluid Density");
-    matter_dataset_lb->add_item(DS_VELOC_ID, "Fluid Velocity Magnitude");
-    matter_dataset_lb->add_item(DS_FORCE_ID, "Force Field Magnitude");
-
+    matter_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
+    matter_dataset_lb->add_item(SF_VELOC_ID, "Fluid Velocity Magnitude");
+    matter_dataset_lb->add_item(SF_FORCE_ID, "Force Field Magnitude");
 
     GLUI_Panel *color_panel = new GLUI_Panel (matter_panel, "Color Mapping");
     new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);
@@ -256,25 +274,35 @@ void init_control_window()
     new GLUI_Button(color_panel, "Custom", CM_CUST_ID, control_cb);
     glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap);
 
-
-
     GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_panel, "Options", true);
     glui->add_checkbox_to_panel(clamp_ro, "Clampling", &clamp_flag, 0, control_cb);
     glui->add_edittext_to_panel(clamp_ro, "MIN", GLUI_EDITTEXT_FLOAT, &clamp_min);
     glui->add_edittext_to_panel(clamp_ro, "MAX", GLUI_EDITTEXT_FLOAT, &clamp_max);
     glui->add_checkbox_to_panel(clamp_ro, "Scaling", &scaling_flag, 0, control_cb);
 
+    // Glyphs Parameters
+    glui->add_checkbox_to_panel(upper_visu_panel, "Display Glyphs", &draw_glyphs_flag, 0, control_cb);
+    GLUI_Panel *glyph_panel = new GLUI_Panel(upper_visu_panel, "");
 
-    glui->add_checkbox_to_panel(upper_visu_panel, "Vector Field", &draw_vecs, 0, control_cb);
-    GLUI_Panel *vector_panel = new GLUI_Panel(upper_visu_panel, "");
+    GLUI_Listbox *vector_dataset_lb = glui->add_listbox_to_panel(glyph_panel, "Vector Field:", &glyphs.vector_field);
+    vector_dataset_lb->add_item(VF_VELOC_ID, "Fluid Velocity Field");
+    vector_dataset_lb->add_item(VF_FORCE_ID, "Force Field");
 
-    glui->add_checkbox_to_panel(vector_panel, "Direction Coloring", &color_dir, 0, control_cb);
-    glui->add_checkbox_to_panel(vector_panel, "Thru Scalar Coloring", &color_dir, 0, control_cb);
+    GLUI_Listbox *scalar_dataset_lb = glui->add_listbox_to_panel(glyph_panel, "Colormap:", &glyphs.scalar_field);
+    scalar_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
+    scalar_dataset_lb->add_item(SF_VELOC_ID, "Fluid Velocity Magnitude");
+    scalar_dataset_lb->add_item(SF_FORCE_ID, "Force Field Magnitude");
+    scalar_dataset_lb->add_item(SF_DIR_ID, "Vector Direction");
+    scalar_dataset_lb->add_item(SF_WHITE_ID, "White");
 
-    GLUI_Panel *hedgehog_panel = new GLUI_Panel (vector_panel, "Hedgehog Scaling");
-    hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
-    new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
-    new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
+
+    //glui->add_checkbox_to_panel(vector_panel, "Direction Coloring", &color_dir, 0, control_cb);
+    //glui->add_checkbox_to_panel(vector_panel, "Thru Scalar Coloring", &color_dir, 0, control_cb);
+
+    //GLUI_Panel *hedgehog_panel = new GLUI_Panel (vector_panel, "Hedgehog Scaling");
+    //hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
+    //new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
+    //new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);

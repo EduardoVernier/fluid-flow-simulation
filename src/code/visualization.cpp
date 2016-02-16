@@ -2,21 +2,24 @@
 #include "ColorMap.h"
 #include "Glyphs.h"
 
-#define COLOR_BLACKWHITE 100   //different types of color mapping: black-and-white, rainbow, banded
+// different types of color mapping: black-and-white, rainbow, fire or custom
+#define COLOR_BLACKWHITE 100
 #define COLOR_RAINBOW 101
 #define COLOR_BANDS 102
 #define COLOR_FIRE 103
 #define COLOR_CUSTOM 104
-#define DATASET_RHO 150
-#define DATASET_VELOCITY 151
-#define DATASET_FORCE 152
+// scalar field selected to be displayed as matter
+#define SCALAR_RHO 150
+#define SCALAR_VELOCITY 151
+#define SCALAR_FORCE 152
 
-int main_window;				//set
-int winWidth, winHeight;      //size of the graphics window, in pixels
+
+int main_window;
+int winWidth, winHeight;        //size of the graphics window, in pixels
 int color_dir = 0;            //use direction color-coding or not
 float vec_scale = 1000;			//scaling of hedgehogs
 int draw_smoke = 1;           //draw the smoke or not
-int draw_vecs = 0;            //draw the vector field or not
+int draw_glyphs_flag = 0;            //draw the vector field or not
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 int quantize_colormap = 0;
@@ -30,7 +33,7 @@ float dataset_min = 0, dataset_max = 10;
 double colorbar_min = 0;
 double colorbar_max = 1;
 
-int dataset_id = DATASET_RHO;
+int dataset_id = SCALAR_RHO;
 
 ColorMap fire = ColorMap((char*)"Fire");
 ColorMap rainbow = ColorMap((char*)"Rainbow");
@@ -39,7 +42,7 @@ ColorMap custom = ColorMap((char*)"Custom");
 int custom_color_index = 0;
 float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 interpolations on a custom colormap
 
-Glyphs glyphs = Glyphs();
+Glyphs glyphs = Glyphs(); // singleton
 
 void init_colormaps()
 {
@@ -57,15 +60,14 @@ void set_colormap(float vy)
 
     if (clamp_flag)
     {
-        if (vy > clamp_max) vy = clamp_max;
-        if (vy < clamp_min) vy = clamp_min;
+        if (vy > clamp_max) vy = clamp_max; if (vy < clamp_min) vy = clamp_min;
         // map interval clamp_min - clamp_max -> out_min - out_max
         vy = (vy - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
     }
+
     if (scaling_flag)
-    {
         vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
-    }
+
 
     glShadeModel(GL_SMOOTH);
     if(quantize_colormap != 0)
@@ -91,7 +93,6 @@ void set_colormap(float vy)
         c = custom.get_color(vy);
         break;
     }
-
     glColor3f(c.r,c.g,c.b);
 }
 
@@ -141,48 +142,6 @@ void draw_colormap()
     }
 }
 
-
-//direction_to_color: Set the current color by mapping a direction vector (x,y), using
-//                    the color mapping method 'method'. If method==1, map the vector direction
-//                    using a rainbow colormap. If method==0, simply use the white color
-void direction_to_color(float x, float y, int method)
-{
-    float r,g,b,f;
-    if (method)
-    {
-        f = atan2(y,x) / 3.1415927 + 1;
-        r = f;
-        if(r > 1) r = 2 - r;
-        g = f + .66667;
-        if(g > 2) g -= 2;
-        if(g > 1) g = 2 - g;
-        b = f + 2 * .66667;
-        if(b > 2) b -= 2;
-        if(b > 1) b = 2 - b;
-    }
-    else
-    { r = g = b = 1; }
-    glColor3f(r,g,b);
-}
-
-void draw_glyphs()
-{
-    int i, j, idx;
-    fftw_real wn = (fftw_real)(winWidth*0.9) / (fftw_real)(DIM + 1);   // Grid cell width
-    fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
-
-    glBegin(GL_LINES);
-    for (i = 0; i < DIM; i++)
-        for (j = 0; j < DIM; j++)
-        {
-            idx = (j * DIM) + i;
-            direction_to_color(vx[idx],vy[idx],color_dir);
-            glVertex2f(wn + (fftw_real)i * wn, hn + (fftw_real)j * hn);
-            glVertex2f((wn + (fftw_real)i * wn) + vec_scale * vx[idx], (hn + (fftw_real)j * hn) + vec_scale * vy[idx]);
-        }
-    glEnd();
-}
-
 //visualize: This is the main visualization function
 void visualize(void)
 {
@@ -192,11 +151,11 @@ void visualize(void)
     fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
     fftw_real *dataset;
-    if (dataset_id == DATASET_RHO)
+    if (dataset_id == SCALAR_RHO)
         dataset = rho;
-    else if (dataset_id == DATASET_VELOCITY)
+    else if (dataset_id == SCALAR_VELOCITY)
         dataset = v_mag;
-    else if (dataset_id == DATASET_FORCE)
+    else if (dataset_id == SCALAR_FORCE)
         dataset = f_mag;
 
     if (draw_smoke)
@@ -237,8 +196,8 @@ void visualize(void)
         }
     }
 
-    if (draw_vecs)
-        draw_glyphs();
+    if (draw_glyphs_flag)
+        glyphs.draw_glyphs();
 
     // draw colormap
     draw_colormap();

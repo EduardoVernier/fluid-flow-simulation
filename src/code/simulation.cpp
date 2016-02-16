@@ -1,8 +1,8 @@
-#define DATASET_RHO 150
-#define DATASET_VELOCITY 151
-#define DATASET_FORCE 152
+#define SCALAR_RHO 150
+#define SCALAR_VELOCITY 151
+#define SCALAR_FORCE 152
 
-const int DIM = 50;				//size of simulation grid
+int DIM = 50; 					//size of simulation grid
 float dt = 0.4;                 //simulation time step
 float visc = 0.001;				//fluid viscosity
 fftw_real *vx, *vy;             //(vx,vy)   = velocity field at the current moment
@@ -144,11 +144,11 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
 	int i, j, i0, j0, i1, j1;
 
     fftw_real *dataset;
-    if (dataset_id == DATASET_RHO)
+    if (dataset_id == SCALAR_RHO)
         dataset = rho;
-    else if (dataset_id == DATASET_VELOCITY)
+    else if (dataset_id == SCALAR_VELOCITY)
         dataset = v_mag;
-    else if (dataset_id == DATASET_FORCE)
+    else if (dataset_id == SCALAR_FORCE)
         dataset = f_mag;
 
     float min_ds = 10000, max_ds = -10000;
