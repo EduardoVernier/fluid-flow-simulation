@@ -11,7 +11,7 @@
 #define VF_FORCE_ID 161
 // glyph type ids
 #define GLYPH_LINE 170
-#define GLYPH_TRI 171
+#define GLYPH_ARROW 171
 // colormap defines
 #define COLOR_BLACKWHITE 100
 #define COLOR_RAINBOW 101
@@ -19,9 +19,12 @@
 #define COLOR_FIRE 103
 #define COLOR_CUSTOM 104
 
+#define PI 3.14159265
+
+
 Glyphs::Glyphs()
 {
-    glyph_type = GLYPH_LINE;
+    glyph_type = GLYPH_ARROW;
     scalar_field = SF_RHO_ID;
     vector_field = VF_VELOC_ID;
     vec_scale = 1000;
@@ -44,18 +47,48 @@ void Glyphs::draw_glyphs()
         vf_y = fy;
     }
 
-    glBegin(GL_LINES);
-    for (i = 0; i < DIM; i++)
-        for (j = 0; j < DIM; j++)
-        {
-            idx = (j * DIM) + i;
-            //direction_to_color(vf_x[idx],vf_y[idx]);
-            color_glyph(i, j);
-            glVertex2f(wn + i * wn, hn + j * hn);
-            glVertex2f((wn + i * wn) + vec_scale * vf_x[idx],
-                        (hn + j * hn) + vec_scale * vf_y[idx]);
-        }
-    glEnd();
+    if (glyph_type == GLYPH_LINE)
+    {
+        glBegin(GL_LINES);
+        for (i = 0; i < DIM; i++)
+            for (j = 0; j < DIM; j++)
+            {
+                idx = (j * DIM) + i;
+                //direction_to_color(vf_x[idx],vf_y[idx]);
+                color_glyph(i, j);
+                glVertex2f(wn + i * wn, hn + j * hn);
+                glVertex2f((wn + i * wn) + vec_scale * vf_x[idx],
+                (hn + j * hn) + vec_scale * vf_y[idx]);
+            }
+        glEnd();
+    }
+    else if (glyph_type == GLYPH_ARROW)
+    {
+        glBegin(GL_TRIANGLES);
+        for (i = 0; i < DIM; i++)
+            for (j = 0; j < DIM; j++)
+            {
+                idx = (j * DIM) + i;
+                //direction_to_color(vf_x[idx],vf_y[idx]);
+                color_glyph(i, j);
+                glVertex2f(wn + i*wn, hn + j*hn);
+                glVertex2f((wn + i*wn) + vec_scale * vf_x[idx],
+                            (hn + j*hn) + vec_scale * vf_y[idx]);
+                double angle_rad = 150*PI/180;
+                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vf_x[idx] -sin(angle_rad)*vf_y[idx]),
+                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vf_x[idx] -cos(angle_rad)*vf_y[idx]));
+
+                glVertex2f(wn + i*wn, hn + j*hn);
+                glVertex2f((wn + i*wn) + vec_scale * vf_x[idx],
+                            (hn + j*hn) + vec_scale * vf_y[idx]);
+                angle_rad = (360-150)*PI/180;
+                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vf_x[idx] -sin(angle_rad)*vf_y[idx]),
+                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vf_x[idx] -cos(angle_rad)*vf_y[idx]));
+            }
+        glEnd();
+
+    }
+
 }
 
 void Glyphs::color_glyph(int i, int j)

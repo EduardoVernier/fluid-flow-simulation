@@ -15,7 +15,7 @@
 #define VF_FORCE_ID 161
 // glyph type ids
 #define GLYPH_LINE 170
-#define GLYPH_TRI 171
+#define GLYPH_ARROW 171
 // button/checkbox/listbox ids
 #define DT_INCREASE_ID 200
 #define DT_DECREASE_ID 201
@@ -118,8 +118,8 @@ void update_variables_config_window()
     char buffer[50];
     sprintf(buffer, "= %.2f", dt);
     dt_text->set_text(buffer);
-    //sprintf(buffer, "= %.2f", vec_scale);
-    //hh_text->set_text(buffer);
+    sprintf(buffer, "= %.2f", glyphs.vec_scale);
+    hh_text->set_text(buffer);
     sprintf(buffer, "= %.6f", visc);
     visc_text->set_text(buffer);
 }
@@ -202,10 +202,10 @@ void control_cb(int control)
             dt -= 0.01;
             break;
         case HH_INCREASE_ID:
-            vec_scale *= 1.2;
+            glyphs.vec_scale *= 1.1;
             break;
         case HH_DECREASE_ID:
-            vec_scale *= 0.8;
+            glyphs.vec_scale *= 0.9;
             break;
         case FV_INCREASE_ID:
             visc *= 1.2;
@@ -295,14 +295,18 @@ void init_control_window()
     scalar_dataset_lb->add_item(SF_DIR_ID, "Vector Direction");
     scalar_dataset_lb->add_item(SF_WHITE_ID, "White");
 
+    GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_panel, "Glypth Type:", &glyphs.glyph_type);
+    glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");
+    glyph_type_lb->add_item(GLYPH_LINE, "Line");
+
 
     //glui->add_checkbox_to_panel(vector_panel, "Direction Coloring", &color_dir, 0, control_cb);
     //glui->add_checkbox_to_panel(vector_panel, "Thru Scalar Coloring", &color_dir, 0, control_cb);
 
-    //GLUI_Panel *hedgehog_panel = new GLUI_Panel (vector_panel, "Hedgehog Scaling");
-    //hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
-    //new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
-    //new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
+    GLUI_Panel *hedgehog_panel = new GLUI_Panel (glyph_panel, "Glyph Scaling");
+    hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
+    new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
+    new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
