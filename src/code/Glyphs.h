@@ -23,12 +23,14 @@ public:
     void color_glyph(int i, int j);
     void direction_to_color(float x, float y);
     void set_colormap(float vy);
+    void bilinear_interpolation(double *vec, double *vf_x, double *vf_y, double i, double j);
 
     double *vf_x, *vf_y;
     double vec_scale;
     int glyph_type;
     int scalar_field;
     int vector_field;
+    int x_axis_samples, y_axis_samples;
 };
 
 #endif // GLYPHS_H

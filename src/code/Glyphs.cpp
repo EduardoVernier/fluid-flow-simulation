@@ -28,11 +28,12 @@ Glyphs::Glyphs()
     scalar_field = SF_RHO_ID;
     vector_field = VF_VELOC_ID;
     vec_scale = 1000;
+    x_axis_samples = 50;
+    y_axis_samples = 50;
 }
 
 void Glyphs::draw_glyphs()
 {
-    int i, j, idx;
     double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
     double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
 
@@ -50,46 +51,76 @@ void Glyphs::draw_glyphs()
     if (glyph_type == GLYPH_LINE)
     {
         glBegin(GL_LINES);
-        for (i = 0; i < DIM; i++)
-            for (j = 0; j < DIM; j++)
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
+        {
+            for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
             {
-                idx = (j * DIM) + i;
-                //direction_to_color(vf_x[idx],vf_y[idx]);
-                color_glyph(i, j);
+                double vec [2] = {0,0};
+                color_glyph(round(i), round(j)); // nearest neighbour polocy for coloring
+                bilinear_interpolation(vec, vf_x, vf_y, i, j); // interpolation for vetor values
                 glVertex2f(wn + i * wn, hn + j * hn);
-                glVertex2f((wn + i * wn) + vec_scale * vf_x[idx],
-                (hn + j * hn) + vec_scale * vf_y[idx]);
+                glVertex2f((wn + i * wn) + vec_scale * vec[0],
+                (hn + j * hn) + vec_scale * vec[1]);
             }
+        }
         glEnd();
     }
     else if (glyph_type == GLYPH_ARROW)
     {
         glBegin(GL_TRIANGLES);
-        for (i = 0; i < DIM; i++)
-            for (j = 0; j < DIM; j++)
+
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
+            for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
             {
-                idx = (j * DIM) + i;
-                //direction_to_color(vf_x[idx],vf_y[idx]);
-                color_glyph(i, j);
-                glVertex2f(wn + i*wn, hn + j*hn);
-                glVertex2f((wn + i*wn) + vec_scale * vf_x[idx],
-                            (hn + j*hn) + vec_scale * vf_y[idx]);
-                double angle_rad = 150*PI/180;
-                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vf_x[idx] -sin(angle_rad)*vf_y[idx]),
-                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vf_x[idx] -cos(angle_rad)*vf_y[idx]));
+                double vec [2] = {0,0};
+                color_glyph(round(i), round(j)); // nearest neighbour polocy for coloring
+                bilinear_interpolation(vec, vf_x, vf_y, i, j); // interpolation for vetor values
 
                 glVertex2f(wn + i*wn, hn + j*hn);
-                glVertex2f((wn + i*wn) + vec_scale * vf_x[idx],
-                            (hn + j*hn) + vec_scale * vf_y[idx]);
+                glVertex2f((wn + i*wn) + vec_scale * vec[0],
+                            (hn + j*hn) + vec_scale * vec[1]);
+                double angle_rad = 150*PI/180;
+                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vec[0] -sin(angle_rad)*vec[1]),
+                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vec[0] -cos(angle_rad)*vec[1]));
+
+
+                glVertex2f(wn + i*wn, hn + j*hn);
+                glVertex2f((wn + i*wn) + vec_scale * vec[0],
+                            (hn + j*hn) + vec_scale * vec[1]);
                 angle_rad = (360-150)*PI/180;
-                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vf_x[idx] -sin(angle_rad)*vf_y[idx]),
-                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vf_x[idx] -cos(angle_rad)*vf_y[idx]));
+                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vec[0] -sin(angle_rad)*vec[1]),
+                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vec[0] -cos(angle_rad)*vec[1]));
             }
         glEnd();
 
     }
 
 }
+
+void Glyphs::bilinear_interpolation(double *vec, double *vf_x, double *vf_y, double i, double j)
+{
+    double x_fxy1 = vf_x[int(floor(j)*DIM + floor(i))]*(1 - (i-floor(i)))
+                + vf_x[int(floor(j)*DIM + ceil(i))]*(i-floor(i));
+
+    double x_fxy2 = vf_x[int(ceil(j)*DIM + floor(i))]*(1 - (i-floor(i)))
+                + vf_x[int(ceil(j)*DIM + ceil(i))]*(i-floor(i));
+
+    double x_fxy = x_fxy1*(1-(j-floor(j))) + x_fxy2*(j-floor(j));
+
+
+    double y_fxy1 = vf_y[int(floor(j)*DIM + floor(i))]*(1 - (i-floor(i)))
+                + vf_y[int(floor(j)*DIM + ceil(i))]*(i-floor(i));
+
+    double y_fxy2 = vf_y[int(ceil(j)*DIM + floor(i))]*(1 - (i-floor(i)))
+                + vf_y[int(ceil(j)*DIM + ceil(i))]*(i-floor(i));
+
+    double y_fxy = y_fxy1*(1-(j-floor(j))) + y_fxy2*(j-floor(j));
+
+    vec[0] = x_fxy;
+    vec[1] = y_fxy;
+
+}
+
 
 void Glyphs::color_glyph(int i, int j)
 {

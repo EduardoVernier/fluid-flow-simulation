@@ -28,12 +28,15 @@
 #define CLAMPING_ID 208
 #define SCALING_ID 209
 #define QUANT_ID 210
+#define SX_INCREASE_ID 220
+#define SX_DECREASE_ID 221
+#define SY_INCREASE_ID 222
+#define SY_DECREASE_ID 223
 
 // statictext objects pointers are global because control_cb callback
 // function can't handle arguments except int values
-GLUI_StaticText *dt_text;
-GLUI_StaticText *hh_text;
-GLUI_StaticText *visc_text;
+GLUI_StaticText *dt_text, *hh_text, *visc_text;
+GLUI_StaticText *x_sample_text, *y_sample_text;
 
 // parameters window and custom colormap window global pointers
 GLUI *glui;
@@ -122,6 +125,10 @@ void update_variables_config_window()
     hh_text->set_text(buffer);
     sprintf(buffer, "= %.6f", visc);
     visc_text->set_text(buffer);
+    sprintf(buffer, "X axis = %d", glyphs.x_axis_samples);
+    x_sample_text->set_text(buffer);
+    sprintf(buffer, "Y axis = %d", glyphs.y_axis_samples);
+    y_sample_text->set_text(buffer);
 }
 
 // resume: Unfortunate solution to rendering glui windows
@@ -227,6 +234,18 @@ void control_cb(int control)
             break;
         case QUANT_ID:
             break;
+        case SX_INCREASE_ID:
+            glyphs.x_axis_samples++;
+            break;
+        case SX_DECREASE_ID:
+            glyphs.x_axis_samples--;
+            break;
+        case SY_INCREASE_ID:
+            glyphs.y_axis_samples++;
+            break;
+        case SY_DECREASE_ID:
+            glyphs.y_axis_samples--;
+            break;
         }
 
         update_variables_config_window();
@@ -299,14 +318,20 @@ void init_control_window()
     glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");
     glyph_type_lb->add_item(GLYPH_LINE, "Line");
 
-
-    //glui->add_checkbox_to_panel(vector_panel, "Direction Coloring", &color_dir, 0, control_cb);
-    //glui->add_checkbox_to_panel(vector_panel, "Thru Scalar Coloring", &color_dir, 0, control_cb);
-
     GLUI_Panel *hedgehog_panel = new GLUI_Panel (glyph_panel, "Glyph Scaling");
     hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
     new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
     new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
+
+    GLUI_Panel *sample_panel = new GLUI_Panel (glyph_panel, "Number of samples");
+    x_sample_text = glui->add_statictext_to_panel(sample_panel, "");
+    new GLUI_Button(sample_panel, "Increase", SX_INCREASE_ID, control_cb);
+    new GLUI_Button(sample_panel, "Decrease", SX_DECREASE_ID, control_cb);
+    glui->add_column_to_panel(sample_panel, false);
+    y_sample_text = glui->add_statictext_to_panel(sample_panel, "");
+    new GLUI_Button(sample_panel, "Increase", SY_INCREASE_ID, control_cb);
+    new GLUI_Button(sample_panel, "Decrease", SY_DECREASE_ID, control_cb);
+
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
