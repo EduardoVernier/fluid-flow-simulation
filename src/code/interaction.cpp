@@ -16,6 +16,7 @@
 // glyph type ids
 #define GLYPH_LINE 170
 #define GLYPH_ARROW 171
+#define GLYPH_CONE 172
 // button/checkbox/listbox ids
 #define DT_INCREASE_ID 200
 #define DT_DECREASE_ID 201
@@ -317,6 +318,8 @@ void init_control_window()
     GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_panel, "Glypth Type:", &glyphs.glyph_type);
     glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");
     glyph_type_lb->add_item(GLYPH_LINE, "Line");
+    glyph_type_lb->add_item(GLYPH_CONE, "Cone");
+
 
     GLUI_Panel *hedgehog_panel = new GLUI_Panel (glyph_panel, "Glyph Scaling");
     hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");

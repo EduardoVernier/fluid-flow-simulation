@@ -145,8 +145,6 @@ void draw_colormap()
 //visualize: This is the main visualization function
 void visualize(void)
 {
-    int i, j, idx;
-    double px,py;
     fftw_real wn = (fftw_real)(winWidth*0.9) / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
@@ -161,18 +159,19 @@ void visualize(void)
     if (draw_smoke)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        for (j = 0; j < DIM - 1; j++)
+        for (int j = 0; j < DIM - 1; j++)
         {
+            double px,py;
             glBegin(GL_TRIANGLE_STRIP);
 
             i = 0;
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
-            idx = (j * DIM) + i;
+            int idx = (j * DIM) + i;
             set_colormap(dataset[idx]);
             glVertex2f(px,py);
 
-            for (i = 0; i < DIM - 1; i++)
+            for (int i = 0; i < DIM - 1; i++)
             {
                 px = wn + (fftw_real)i * wn;
                 py = hn + (fftw_real)(j + 1) * hn;

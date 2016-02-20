@@ -31,10 +31,10 @@ Color ColorMap::get_color(float value)
     }
     else
     {
-        float x, y;
         Color c = Color(0,0,0);
         for (unsigned it = 0; it < color_ranges.size(); ++it)
         {
+            float x, y;
             Color a = get<0>(color_ranges[it]);
             Color b = get<1>(color_ranges[it]);
             x = get<2>(color_ranges[it]);

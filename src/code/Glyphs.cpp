@@ -12,6 +12,7 @@
 // glyph type ids
 #define GLYPH_LINE 170
 #define GLYPH_ARROW 171
+#define GLYPH_CONE 172
 // colormap defines
 #define COLOR_BLACKWHITE 100
 #define COLOR_RAINBOW 101
@@ -30,6 +31,8 @@ Glyphs::Glyphs()
     vec_scale = 1000;
     x_axis_samples = 50;
     y_axis_samples = 50;
+    vf_x = vx;
+    vf_y = vy;
 }
 
 void Glyphs::draw_glyphs()
@@ -92,8 +95,57 @@ void Glyphs::draw_glyphs()
                             (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vec[0] -cos(angle_rad)*vec[1]));
             }
         glEnd();
-
     }
+/*
+    else if (glyph_type == GLYPH_CONE)
+    {
+
+
+
+                glClear(GL_COLOR_BUFFER_BIT);
+                    // clear the identity matrix.
+                    glLoadIdentity();
+                    // traslate the draw by z = -4.0
+                    // Note this when you decrease z like -8.0 the drawing will looks far , or smaller.
+                    glTranslatef(50,50.0,-4.5);
+                    // Red color used to draw.
+                    glColor3f(0.8, 0.2, 0.1);
+                    // changing in transformation matrix.
+                    // rotation about X axis
+                    glRotatef(0,1.0,0.0,0.0);
+                    // rotation about Y axis
+                    glRotatef(0,0.0,1.0,0.0);
+                    // rotation about Z axis
+                    glRotatef(0,0.0,0.0,1.0);
+                    // scaling transfomation
+                    glScalef(1.0,1.0,1.0);
+                    // built-in (glut library) function , draw you a Cone.
+
+
+                    glutSolidCone(0.1,1.5,50,50);
+                    // Flush buffers to screen
+
+                    glFlush();
+                    // sawp buffers called because we are using double buffering
+                   // glutSwapBuffers(); - See more at: http://www.codemiles.com/c-opengl-examples/drawing-cone-using-opengl-t9013.html#sthash.DDvAPJHo.dpuf
+/*
+
+                glVertex2f(wn + i*wn, hn + j*hn);
+                glVertex2f((wn + i*wn) + vec_scale * vec[0],
+                            (hn + j*hn) + vec_scale * vec[1]);
+                double angle_rad = 150*PI/180;
+                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vec[0] -sin(angle_rad)*vec[1]),
+                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vec[0] -cos(angle_rad)*vec[1]));
+
+
+                glVertex2f(wn + i*wn, hn + j*hn);
+                glVertex2f((wn + i*wn) + vec_scale * vec[0],
+                            (hn + j*hn) + vec_scale * vec[1]);
+                angle_rad = (360-150)*PI/180;
+                glVertex2f((wn + i*wn) + 0.2*vec_scale*(cos(angle_rad)*vec[0] -sin(angle_rad)*vec[1]),
+                            (hn + j*hn) + 0.2*vec_scale*(sin(angle_rad)*vec[0] -cos(angle_rad)*vec[1]));
+*/
+
 
 }
 
