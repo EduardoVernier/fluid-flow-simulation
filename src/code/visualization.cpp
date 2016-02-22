@@ -164,14 +164,14 @@ void visualize(void)
             double px,py;
             glBegin(GL_TRIANGLE_STRIP);
 
-            i = 0;
+            int i = 0;
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
             int idx = (j * DIM) + i;
             set_colormap(dataset[idx]);
             glVertex2f(px,py);
 
-            for (int i = 0; i < DIM - 1; i++)
+            for (i = 0; i < DIM - 1; i++)
             {
                 px = wn + (fftw_real)i * wn;
                 py = hn + (fftw_real)(j + 1) * hn;
