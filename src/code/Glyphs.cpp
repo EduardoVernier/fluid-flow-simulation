@@ -25,7 +25,7 @@
 
 Glyphs::Glyphs()
 {
-    glyph_type = GLYPH_NEEDLE;
+    glyph_type = GLYPH_ARROW;
     scalar_field = SF_RHO_ID;
     vector_field = VF_VELOC_ID;
     vec_scale = 1300;
@@ -98,9 +98,41 @@ void Glyphs::draw_glyphs()
     }
     else if (glyph_type == GLYPH_ARROW)
     {
+        glBegin(GL_LINES);
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
+        {
+            for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
+            {
+                double vec [2] = {0,0};
+                color_glyph(round(i), round(j)); // nearest neighbour polocy for coloring
+                bilinear_interpolation(vec, vf_x, vf_y, i, j); // interpolation for vetor values
+                glVertex2f(wn + i * wn, hn + j * hn);
+                glVertex2f((wn + i * wn) + vec_scale * vec[0],
+                (hn + j * hn) + vec_scale * vec[1]);
+            }
+        }
+        glEnd();
 
+        glBegin(GL_TRIANGLES);
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
+            for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
+            {
+                double vec [2] = {0,0};
+                color_glyph(round(i), round(j)); // nearest neighbour polocy for coloring
+                bilinear_interpolation(vec, vf_x, vf_y, i, j); // interpolation for vetor values
 
+                glVertex2f((wn + i*wn) + vec_scale * vec[0],
+                            (hn + j*hn) + vec_scale * vec[1]);
 
+                double angle_rad = 0.0;
+                glVertex2f((wn + i*wn) + 0.8*vec_scale*vec[0] + 0.05*vec_scale*(cos(angle_rad)*vec[1] -sin(angle_rad)*vec[0]),
+                            (hn + j*hn) + 0.8*vec_scale*vec[1] + 0.05*vec_scale*(sin(angle_rad)*vec[1] -cos(angle_rad)*vec[0]));
+
+                glVertex2f((wn + i*wn) + 0.8*vec_scale*vec[0] + (-0.05)*vec_scale*(cos(angle_rad)*vec[1] -sin(angle_rad)*vec[0]),
+                            (hn + j*hn) + 0.8*vec_scale*vec[1] + (-0.05)*vec_scale*(sin(angle_rad)*vec[1] -cos(angle_rad)*vec[0]));
+
+            }
+            glEnd();
     }
 }
 
