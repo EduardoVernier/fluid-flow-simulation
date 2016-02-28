@@ -8,6 +8,8 @@
 #define SF_RHO_ID 150
 #define SF_VELOC_ID 151
 #define SF_FORCE_ID 152
+#define SF_DIVERGENCY_ID 153
+
 #define SF_DIR_ID 162
 #define SF_WHITE_ID 163
 // vector fields ids
@@ -286,6 +288,7 @@ void init_control_window()
     matter_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
     matter_dataset_lb->add_item(SF_VELOC_ID, "Fluid Velocity Magnitude");
     matter_dataset_lb->add_item(SF_FORCE_ID, "Force Field Magnitude");
+    matter_dataset_lb->add_item(SF_DIVERGENCY_ID, "Velocity Field Divergency");
 
     GLUI_Panel *color_panel = new GLUI_Panel (matter_panel, "Color Mapping");
     new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);

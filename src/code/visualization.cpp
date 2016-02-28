@@ -12,6 +12,7 @@
 #define SCALAR_RHO 150
 #define SCALAR_VELOCITY 151
 #define SCALAR_FORCE 152
+#define SCALAR_DIVERGENCY 153
 
 
 int main_window;
@@ -155,6 +156,8 @@ void visualize(void)
         dataset = v_mag;
     else if (dataset_id == SCALAR_FORCE)
         dataset = f_mag;
+    else if (dataset_id == SCALAR_DIVERGENCY)
+        dataset = div_vf;
 
     if (draw_smoke)
     {
