@@ -10,9 +10,10 @@
 #define COLOR_CUSTOM 104
 // scalar field selected to be displayed as matter
 #define SCALAR_RHO 150
-#define SCALAR_VELOCITY 151
-#define SCALAR_FORCE 152
-#define SCALAR_DIVERGENCY 153
+#define SCALAR_VELOC_MAG 151
+#define SCALAR_FORCE_MAG 152
+#define SCALAR_VELOC_DIV 153
+#define SCALAR_FORCE_DIV 154
 
 
 int main_window;
@@ -152,11 +153,11 @@ void visualize(void)
     fftw_real *dataset;
     if (dataset_id == SCALAR_RHO)
         dataset = rho;
-    else if (dataset_id == SCALAR_VELOCITY)
+    else if (dataset_id == SCALAR_VELOC_MAG)
         dataset = v_mag;
-    else if (dataset_id == SCALAR_FORCE)
+    else if (dataset_id == SCALAR_FORCE_MAG)
         dataset = f_mag;
-    else if (dataset_id == SCALAR_DIVERGENCY)
+    else if (dataset_id == SCALAR_FORCE_DIV || dataset_id == SCALAR_VELOC_DIV)
         dataset = div_vf;
 
     if (draw_smoke)

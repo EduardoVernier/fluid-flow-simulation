@@ -1,7 +1,9 @@
 #define SCALAR_RHO 150
-#define SCALAR_VELOCITY 151
-#define SCALAR_FORCE 152
-#define SCALAR_DIVERGENCY 153
+#define SCALAR_VELOC_MAG 151
+#define SCALAR_FORCE_MAG 152
+#define SCALAR_VELOC_DIV 153
+#define SCALAR_FORCE_DIV 154
+
 
 int DIM = 50; 					//size of simulation grid
 float dt = 0.4;                 //simulation time step
@@ -148,8 +150,23 @@ void solve(int n, fftw_real* vx, fftw_real* vy, fftw_real* vx0, fftw_real* vy0, 
 void compute_derivatives_and_divergency()
 {
     // current vector field can be the velocity or force fields
-    fftw_real* current_vfx = vx;
-    fftw_real* current_vfy = vy;
+	fftw_real *current_vfx;
+	fftw_real *current_vfy;
+	if (dataset_id == SCALAR_VELOC_DIV)
+	{
+		current_vfx = vx;
+		current_vfy = vy;
+	}
+	else if (dataset_id == SCALAR_FORCE_DIV)
+	{
+		current_vfx = fx;
+		current_vfy = fy;
+	}
+	else
+	{
+		return;
+	}
+
 
     for(int i = 0; i < DIM; ++i)
     {
@@ -180,14 +197,15 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
 	fftw_real x, y, x0, y0, s, t;
 	int i, j, i0, j0, i1, j1;
 
+	// Used to calculate scaling values
     fftw_real *dataset;
     if (dataset_id == SCALAR_RHO)
         dataset = rho;
-    else if (dataset_id == SCALAR_VELOCITY)
+    else if (dataset_id == SCALAR_VELOC_MAG)
         dataset = v_mag;
-    else if (dataset_id == SCALAR_FORCE)
+    else if (dataset_id == SCALAR_FORCE_MAG)
         dataset = f_mag;
-	else if (dataset_id == SCALAR_DIVERGENCY)
+	else if (dataset_id == SCALAR_FORCE_DIV || dataset_id == SCALAR_VELOC_DIV)
         dataset = div_vf;
 
     float min_ds = 10000, max_ds = -10000;

@@ -6,9 +6,11 @@
 #define CM_CUST_ID 104
 // scalar field selector id on listbox
 #define SF_RHO_ID 150
-#define SF_VELOC_ID 151
-#define SF_FORCE_ID 152
-#define SF_DIVERGENCY_ID 153
+#define SF_VELOC_MAG_ID 151
+#define SF_FORCE_MAG_ID 152
+#define SF_VELOC_DIV_ID 153
+#define SF_FORCE_DIV_ID 154
+
 
 #define SF_DIR_ID 162
 #define SF_WHITE_ID 163
@@ -286,9 +288,10 @@ void init_control_window()
     GLUI_Panel *dataset_panel = new GLUI_Panel (matter_panel, "Dataset Selection");
     GLUI_Listbox *matter_dataset_lb = glui->add_listbox_to_panel(dataset_panel, "", &dataset_id);
     matter_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
-    matter_dataset_lb->add_item(SF_VELOC_ID, "Fluid Velocity Magnitude");
-    matter_dataset_lb->add_item(SF_FORCE_ID, "Force Field Magnitude");
-    matter_dataset_lb->add_item(SF_DIVERGENCY_ID, "Velocity Field Divergency");
+    matter_dataset_lb->add_item(SF_VELOC_MAG_ID, "Fluid Velocity Magnitude");
+    matter_dataset_lb->add_item(SF_FORCE_MAG_ID, "Force Field Magnitude");
+    matter_dataset_lb->add_item(SF_VELOC_DIV_ID, "Velocity Field Divergency");
+    matter_dataset_lb->add_item(SF_FORCE_DIV_ID, "Force Field Divergency");
 
     GLUI_Panel *color_panel = new GLUI_Panel (matter_panel, "Color Mapping");
     new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);
@@ -313,8 +316,8 @@ void init_control_window()
 
     GLUI_Listbox *scalar_dataset_lb = glui->add_listbox_to_panel(glyph_panel, "Colormap:", &glyphs.scalar_field);
     scalar_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
-    scalar_dataset_lb->add_item(SF_VELOC_ID, "Fluid Velocity Magnitude");
-    scalar_dataset_lb->add_item(SF_FORCE_ID, "Force Field Magnitude");
+    scalar_dataset_lb->add_item(SF_VELOC_MAG_ID, "Fluid Velocity Magnitude");
+    scalar_dataset_lb->add_item(SF_FORCE_MAG_ID, "Force Field Magnitude");
     scalar_dataset_lb->add_item(SF_DIR_ID, "Vector Direction");
     scalar_dataset_lb->add_item(SF_WHITE_ID, "White");
 
