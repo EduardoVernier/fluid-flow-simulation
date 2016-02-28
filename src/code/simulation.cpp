@@ -172,17 +172,17 @@ void compute_derivatives_and_divergency()
     {
         for (int j = 0; j < DIM; ++j)
         {
-            // calculate x axis derivative
+            // calculate y axis derivative
             if (j == DIM-1) // make algorithm circular
-                der_vfx[i*DIM + j] = current_vfx[i*DIM] - current_vfx[i*DIM + j];
+                der_vfy[i*DIM + j] = current_vfy[i*DIM] - current_vfy[i*DIM + j];
             else
-                der_vfx[i*DIM + j] = current_vfx[i*DIM + j + 1] - current_vfx[i*DIM + j];
+                der_vfy[i*DIM + j] = current_vfy[i*DIM + j + 1] - current_vfy[i*DIM + j];
 
             // calculate y axis derivative
             if (i == DIM - 1)
-                der_vfy[i*DIM + j] = current_vfy[j] - current_vfy[i*DIM + j];
+                der_vfx[i*DIM + j] = current_vfx[j] - current_vfx[i*DIM + j];
             else
-                der_vfy[i*DIM + j] = current_vfy[(i+1)*DIM + j] - current_vfy[i*DIM + j];
+                der_vfx[i*DIM + j] = current_vfx[(i+1)*DIM + j] - current_vfx[i*DIM + j];
 
             // compute divergency scalar field (absolute value)
             div_vf[i*DIM + j] = fabs (current_vfx[i*DIM + j]) + fabs(current_vfy[i*DIM + j]);
