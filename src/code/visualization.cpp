@@ -46,6 +46,7 @@ float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 i
 
 Glyphs glyphs = Glyphs(); // singleton
 
+// Example of how to "build" a colormap
 void init_colormaps()
 {
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
@@ -55,10 +56,10 @@ void init_colormaps()
 
 
 //set_colormap: Sets three different types of colormaps
-void set_colormap(float vy)
+void set_colormap(double vy)
 {
     Color c;
-    float out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
+    double out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
 
     if (clamp_flag)
     {
@@ -130,7 +131,7 @@ void draw_colormap()
             glPushMatrix();
             glLoadIdentity();
             glRasterPos2i( 0.96*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
-            for (unsigned j = 0; j < 4; ++j ) //only first 4 characters
+            for (unsigned j = 0; j < 5; ++j ) //only first 5 characters
             {
                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[j]);
             }

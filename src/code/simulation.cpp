@@ -185,10 +185,10 @@ void compute_derivatives_and_divergency()
                 der_vfx[i*DIM + j] = current_vfx[(i+1)*DIM + j] - current_vfx[i*DIM + j];
 
             // compute divergency scalar field (absolute value)
-            div_vf[i*DIM + j] = fabs (current_vfx[i*DIM + j]) + fabs(current_vfy[i*DIM + j]);
+            div_vf[i*DIM + j] = current_vfx[i*DIM + j] + current_vfy[i*DIM + j];
         }
     }
-}
+    }
 
 // diffuse_matter: This function diffuses matter that has been placed in the velocity field. It's almost identical to the
 // velocity diffusion step in the function above. The input matter densities are in rho0 and the result is written into rho.
