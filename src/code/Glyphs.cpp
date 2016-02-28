@@ -54,12 +54,12 @@ void Glyphs::draw_glyphs()
     if (glyph_type == GLYPH_LINE)
     {
         glBegin(GL_LINES);
-        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
+        for (double i = 0; i < DIM/2+0.01; i += (DIM/(double)x_axis_samples))
         {
             for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
             {
                 double vec [2] = {0,0};
-                color_glyph(round(i), round(j)); // nearest neighbour polocy for coloring
+                color_glyph(round(i), round(j)); // nearest neighbour policy for coloring
                 bilinear_interpolation(vec, vf_x, vf_y, i, j); // interpolation for vetor values
                 glVertex2f(wn + i * wn, hn + j * hn);
                 glVertex2f((wn + i * wn) + vec_scale * vec[0],

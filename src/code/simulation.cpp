@@ -6,6 +6,7 @@ int DIM = 50; 					//size of simulation grid
 float dt = 0.4;                 //simulation time step
 float visc = 0.001;				//fluid viscosity
 fftw_real *vx, *vy;             //(vx,vy)   = velocity field at the current moment
+double *der_vx, *der_vy;     //(vx,vy)   = derivate of the velocity field at the current moment
 fftw_real *v_mag;               //vector that stores velocity magnitude dataset
 fftw_real *vx0, *vy0;           //(vx0,vy0) = velocity field at the previous moment
 fftw_real *fx, *fy;	            //(fx,fy)   = user-controlled simulation forces, steered with the mouse
@@ -28,6 +29,8 @@ void init_simulation(int n)
 	dim     = n * 2*(n/2+1)*sizeof(fftw_real);        //Allocate data structures
     vx      = (fftw_real*) malloc(dim);
     vy      = (fftw_real*) malloc(dim);
+    der_vx  = (fftw_real*) malloc(dim);
+    der_vy  = (fftw_real*) malloc(dim);
     v_mag   = (fftw_real*) malloc(dim);
     vx0     = (fftw_real*) malloc(dim);
     vy0     = (fftw_real*) malloc(dim);
@@ -41,7 +44,10 @@ void init_simulation(int n)
 	plan_cr = rfftw2d_create_plan(n, n, FFTW_COMPLEX_TO_REAL, FFTW_IN_PLACE);
 
 	for (i = 0; i < n * n; i++)                      //Initialize data structures to 0
-        vx[i] = vy[i] = v_mag[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = f_mag[i] = rho[i] = rho0[i] = 0.0f;
+    {
+        vx[i] = vy[i] = der_vx[i] = der_vy[i] = 0.0f;
+        v_mag[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = f_mag[i] = rho[i] = rho0[i] = 0.0f;
+    }
 
 }
 
@@ -135,6 +141,27 @@ void solve(int n, fftw_real* vx, fftw_real* vy, fftw_real* vx0, fftw_real* vy0, 
     }
 }
 
+void compute_derivatives()
+{
+
+    for(int i = 0; i < DIM; ++i)
+    {
+        for (int j = 0; j < DIM; ++j)
+        {
+            // calculate x axis derivative
+            if (j == DIM-1) // make algorithm circular
+                der_vx[i*DIM + j] = vx[i*DIM] - vx[i*DIM + j];
+            else
+                der_vx[i*DIM + j] = vx[i*DIM + j + 1] - vx[i*DIM + j];
+
+            // calculate y axis derivative
+            if (i == DIM - 1)
+                der_vy[i*DIM + j] = vy[j] - vy[i*DIM + j];
+            else
+                der_vy[i*DIM + j] = vy[(i+1)*DIM + j] - vy[i*DIM + j];
+        }
+    }
+}
 
 // diffuse_matter: This function diffuses matter that has been placed in the velocity field. It's almost identical to the
 // velocity diffusion step in the function above. The input matter densities are in rho0 and the result is written into rho.
@@ -172,6 +199,8 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
 			j0 = (n+(j0%n))%n;
 			j1 = (j0+1)%n;
 			rho[i+n*j] = (1-s)*((1-t)*rho0[i0+n*j0]+t*rho0[i0+n*j1])+s*((1-t)*rho0[i1+n*j0]+t*rho0[i1+n*j1]);
+
+            // get dataset max/min in case scaling is on
             if (dataset[i+n*j] > max_ds) max_ds = dataset[i+n*j];
             if (dataset[i+n*j] < min_ds) min_ds = dataset[i+n*j];
         }
@@ -179,6 +208,7 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
     dataset_max = max_ds;
     dataset_min = min_ds;
     //printf ("%f  %f\n", min_ds, max_ds);
+    compute_derivatives();
 }
 
 //set_forces: copy user-controlled forces to the force vectors that are sent to the solver.
