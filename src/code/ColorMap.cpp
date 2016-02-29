@@ -1,5 +1,10 @@
 #include "ColorMap.h"
 
+ColorMap::ColorMap(char* _name)
+{
+    strcpy(name, _name);
+}
+
 
 Color ColorMap::interpolate(Color a, Color b, float value)
 {
@@ -31,7 +36,7 @@ Color ColorMap::get_color(float value)
     }
     else
     {
-        Color c = Color(1,1,1);
+        Color c = Color(0,0,0);
         for (unsigned it = 0; it < color_ranges.size(); ++it)
         {
             float x, y;

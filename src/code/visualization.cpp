@@ -22,7 +22,7 @@ int color_dir = 0;            //use direction color-coding or not
 float vec_scale = 1000;			//scaling of hedgehogs
 int draw_smoke = 1;           //draw the smoke or not
 int draw_glyphs_flag = 0;            //draw the vector field or not
-int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
+int scalar_col = COLOR_RAINBOW;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 int quantize_colormap = 0;
 
@@ -39,19 +39,54 @@ int dataset_id = SCALAR_RHO;
 
 ColorMap fire = ColorMap((char*)"Fire");
 ColorMap rainbow = ColorMap((char*)"Rainbow");
-
 ColorMap custom = ColorMap((char*)"Custom");
 int custom_color_index = 0;
 float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 interpolations on a custom colormap
 
 Glyphs glyphs = Glyphs(); // singleton
 
-// Example of how to "build" a colormap
+// all is global for now - refactor later!
+unsigned int textureID[1];
+
+
+void createTextures()					//Create one 1D texture for each of the available colormaps.
+{														//We will next use these textures to color map scalar data.
+
+	glGenTextures(1,textureID);							//Generate 3 texture names, for the textures we will create
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);				//Make sure that OpenGL will understand our CPU-side texture storage format
+
+	for(int i=0;i<1;++i)
+	{													//Generate all three textures:
+		glBindTexture(GL_TEXTURE_1D,textureID[i]);		//Make i-th texture active (for setting it)
+		const int size = 512;							//Allocate a texture-buffer large enough to store our colormaps with high resolution
+		float textureImage[3*size];
+
+		for(int j=0;j<size;++j)							//Generate all 'size' RGB texels for the current texture:
+		{
+			float v = float(j)/(size-1);				//Compute a scalar value in [0,1]
+			//float R,G,B;
+			Color c = rainbow.get_color(v);						//Map this scalar value to a color, using the current colormap
+
+			textureImage[3*j]   = c.r;					//Store the color for this scalar value in the texture
+			textureImage[3*j+1] = c.g;
+			textureImage[3*j+2] = c.b;
+		}
+		glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,size,0,GL_RGB,GL_FLOAT,textureImage);
+														//The texture is ready - pass it to OpenGL
+	}
+
+	//colormap_type = (COLORMAP_TYPE)0;					//Reset the currently-active colormap to the default (first one)
+}
+
+
 void init_colormaps()
 {
+    // Example of how to "build" a colormap
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
     fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
     fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
+
+    createTextures();
 }
 
 
@@ -60,6 +95,11 @@ void set_colormap(double vy)
 {
     Color c;
     double out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
+
+    // test test
+    if (vy > 0.99) vy = 0.99;
+    if (vy < 0) vy = 0.01;
+
 
     if (clamp_flag)
     {
@@ -72,7 +112,8 @@ void set_colormap(double vy)
         vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
 
 
-    glShadeModel(GL_SMOOTH);
+    //glShadeModel(GL_SMOOTH);
+/*
     if(quantize_colormap != 0)
     {
         glShadeModel(GL_FLAT);
@@ -80,14 +121,16 @@ void set_colormap(double vy)
         vy = (int)(vy);
         vy/= quantize_colormap;
     }
-
+*/
     switch(scalar_col)
     {
     case COLOR_BLACKWHITE:
         c = Color(vy,vy,vy);
         break;
     case COLOR_RAINBOW:
-        c = rainbow.get_color(vy);
+        glEnable(GL_TEXTURE_1D);
+        glTexCoord1f(vy);
+        //c = rainbow.get_color(vy);
         break;
     case COLOR_FIRE:
         c = fire.get_color(vy);
@@ -96,7 +139,7 @@ void set_colormap(double vy)
         c = custom.get_color(vy);
         break;
     }
-    glColor3f(c.r,c.g,c.b);
+    //glColor3f(c.r,c.g,c.b);
 }
 
 
@@ -164,6 +207,15 @@ void visualize(void)
     if (draw_smoke)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDisable(GL_LIGHTING);
+        glShadeModel(GL_SMOOTH);
+        glEnable(GL_TEXTURE_1D);
+        glBindTexture(GL_TEXTURE_1D,textureID[0]);
+    	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    	glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
         for (int j = 0; j < DIM - 1; j++)
         {
             double px,py;
@@ -173,7 +225,7 @@ void visualize(void)
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
             int idx = (j * DIM) + i;
-            set_colormap(dataset[idx]);
+            glTexCoord1f(dataset[idx]);
             glVertex2f(px,py);
 
             for (i = 0; i < DIM - 1; i++)
@@ -181,19 +233,19 @@ void visualize(void)
                 px = wn + (fftw_real)i * wn;
                 py = hn + (fftw_real)(j + 1) * hn;
                 idx = ((j + 1) * DIM) + i;
-                set_colormap(dataset[idx]);
+                glTexCoord1f(dataset[idx]);
                 glVertex2f(px, py);
                 px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
                 idx = (j * DIM) + (i + 1);
-                set_colormap(dataset[idx]);
+                glTexCoord1f(dataset[idx]);
                 glVertex2f(px, py);
             }
 
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
-            set_colormap(dataset[idx]);
+            glTexCoord1f(dataset[idx]);
             glVertex2f(px, py);
 
             glEnd();
