@@ -31,7 +31,7 @@ Color ColorMap::get_color(float value)
     }
     else
     {
-        Color c = Color(0,0,0);
+        Color c = Color(1,1,1);
         for (unsigned it = 0; it < color_ranges.size(); ++it)
         {
             float x, y;
