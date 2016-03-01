@@ -11,7 +11,6 @@
 #define SF_VELOC_DIV_ID 153
 #define SF_FORCE_DIV_ID 154
 
-
 #define SF_DIR_ID 162
 #define SF_WHITE_ID 163
 // vector fields ids
@@ -37,6 +36,8 @@
 #define SX_DECREASE_ID 221
 #define SY_INCREASE_ID 222
 #define SY_DECREASE_ID 223
+
+#define ENABLE_GLYPHS 302
 
 // statictext objects pointers are global because control_cb callback
 // function can't handle arguments except int values
@@ -266,26 +267,26 @@ void init_control_window()
     glui = GLUI_Master.create_glui( "GLUI" );
 
     // Simulation Parameters
-    GLUI_Panel *simu_panel = new GLUI_Panel (glui, "Simulation Parameters");
-
-    GLUI_Panel *dt_panel = new GLUI_Panel (simu_panel, "Time Step");
+    GLUI_Rollout *simu_rollout = glui->add_rollout ("Simulation Parameters", false);
+    simu_rollout->set_w(300);
+    GLUI_Panel *dt_panel = new GLUI_Panel (simu_rollout, "Time Step");
     dt_text = glui->add_statictext_to_panel(dt_panel, "");
     new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb);
     new GLUI_Button(dt_panel, "Decrease", DT_DECREASE_ID, control_cb);
 
-    glui->add_column_to_panel(simu_panel, false);
+    glui->add_column_to_panel(simu_rollout, false);
 
-    GLUI_Panel *visc_panel = new GLUI_Panel (simu_panel, "Fluid Viscosity");
+    GLUI_Panel *visc_panel = new GLUI_Panel (simu_rollout, "Fluid Viscosity");
     visc_text = glui->add_statictext_to_panel(visc_panel, "");
     new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb);
     new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb);
 
     // Matter Parameters
-    GLUI_Panel *upper_visu_panel = new GLUI_Panel(glui, "Visualization Paramenters");
-    glui->add_checkbox_to_panel(upper_visu_panel, "Display Matter", &draw_smoke, 0, control_cb);
-    GLUI_Panel *matter_panel = new GLUI_Panel(upper_visu_panel, "");
+    GLUI_Panel *matter_rollout = glui->add_rollout("Matter", true);
+    matter_rollout->set_w(1000);
+    glui->add_checkbox_to_panel(matter_rollout, "Enable Matter", &draw_smoke, 0, control_cb);
 
-    GLUI_Panel *dataset_panel = new GLUI_Panel (matter_panel, "Dataset Selection");
+    GLUI_Panel *dataset_panel = new GLUI_Panel (matter_rollout, "Dataset Selection");
     GLUI_Listbox *matter_dataset_lb = glui->add_listbox_to_panel(dataset_panel, "", &dataset_id);
     matter_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
     matter_dataset_lb->add_item(SF_VELOC_MAG_ID, "Fluid Velocity Magnitude");
@@ -293,46 +294,45 @@ void init_control_window()
     matter_dataset_lb->add_item(SF_VELOC_DIV_ID, "Velocity Field Divergency");
     matter_dataset_lb->add_item(SF_FORCE_DIV_ID, "Force Field Divergency");
 
-    GLUI_Panel *color_panel = new GLUI_Panel (matter_panel, "Color Mapping");
+    GLUI_Panel *color_panel = new GLUI_Panel (matter_rollout, "Color Mapping");
     new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);
     new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb);
     new GLUI_Button(color_panel, "Fire", CM_FIRE_ID, control_cb);
     new GLUI_Button(color_panel, "Custom", CM_CUST_ID, control_cb);
     glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap);
 
-    GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_panel, "Options", true);
+    GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_rollout, "Options", true);
     glui->add_checkbox_to_panel(clamp_ro, "Clampling", &clamp_flag, 0, control_cb);
     glui->add_edittext_to_panel(clamp_ro, "MIN", GLUI_EDITTEXT_FLOAT, &clamp_min);
     glui->add_edittext_to_panel(clamp_ro, "MAX", GLUI_EDITTEXT_FLOAT, &clamp_max);
     glui->add_checkbox_to_panel(clamp_ro, "Scaling", &scaling_flag, 0, control_cb);
 
     // Glyphs Parameters
-    glui->add_checkbox_to_panel(upper_visu_panel, "Display Glyphs", &draw_glyphs_flag, 0, control_cb);
-    GLUI_Panel *glyph_panel = new GLUI_Panel(upper_visu_panel, "");
+    GLUI_Rollout *glyph_rollout = glui->add_rollout("Glyphs", true);
+    glui->add_checkbox_to_panel(glyph_rollout, "Enable Glyphs", &draw_glyphs_flag, 0, control_cb);
 
-    GLUI_Listbox *vector_dataset_lb = glui->add_listbox_to_panel(glyph_panel, "Vector Field:", &glyphs.vector_field);
+    GLUI_Listbox *vector_dataset_lb = glui->add_listbox_to_panel(glyph_rollout, "Vector Field:", &glyphs.vector_field);
     vector_dataset_lb->add_item(VF_VELOC_ID, "Fluid Velocity Field");
     vector_dataset_lb->add_item(VF_FORCE_ID, "Force Field");
 
-    GLUI_Listbox *scalar_dataset_lb = glui->add_listbox_to_panel(glyph_panel, "Colormap:", &glyphs.scalar_field);
+    GLUI_Listbox *scalar_dataset_lb = glui->add_listbox_to_panel(glyph_rollout, "Colormap:", &glyphs.scalar_field);
     scalar_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
     scalar_dataset_lb->add_item(SF_VELOC_MAG_ID, "Fluid Velocity Magnitude");
     scalar_dataset_lb->add_item(SF_FORCE_MAG_ID, "Force Field Magnitude");
     scalar_dataset_lb->add_item(SF_DIR_ID, "Vector Direction");
     scalar_dataset_lb->add_item(SF_WHITE_ID, "White");
 
-    GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_panel, "Glypth Type:", &glyphs.glyph_type);
+    GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_rollout, "Glypth Type:", &glyphs.glyph_type);
     glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");
     glyph_type_lb->add_item(GLYPH_NEEDLE, "Needle");
     glyph_type_lb->add_item(GLYPH_LINE, "Line");
 
-
-    GLUI_Panel *hedgehog_panel = new GLUI_Panel (glyph_panel, "Glyph Scaling");
+    GLUI_Panel *hedgehog_panel = new GLUI_Panel (glyph_rollout, "Glyph Scaling");
     hh_text = glui->add_statictext_to_panel(hedgehog_panel, "");
     new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
     new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
 
-    GLUI_Panel *sample_panel = new GLUI_Panel (glyph_panel, "Number of samples");
+    GLUI_Panel *sample_panel = new GLUI_Panel (glyph_rollout, "Number of samples");
     x_sample_text = glui->add_statictext_to_panel(sample_panel, "");
     new GLUI_Button(sample_panel, "Increase", SX_INCREASE_ID, control_cb);
     new GLUI_Button(sample_panel, "Decrease", SX_DECREASE_ID, control_cb);
@@ -340,7 +340,6 @@ void init_control_window()
     y_sample_text = glui->add_statictext_to_panel(sample_panel, "");
     new GLUI_Button(sample_panel, "Increase", SY_INCREASE_ID, control_cb);
     new GLUI_Button(sample_panel, "Decrease", SY_DECREASE_ID, control_cb);
-
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
