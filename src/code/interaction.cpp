@@ -267,23 +267,28 @@ void init_control_window()
     glui = GLUI_Master.create_glui( "GLUI" );
 
     // Simulation Parameters
-    GLUI_Rollout *simu_rollout = glui->add_rollout ("Simulation Parameters", false);
-    simu_rollout->set_w(300);
-    GLUI_Panel *dt_panel = new GLUI_Panel (simu_rollout, "Time Step");
+    GLUI_Rollout *simu_rollout = glui->add_rollout ("Simulation", true);
+    GLUI_StaticText *spacer_simu = glui->add_statictext_to_panel(simu_rollout, "");
+    spacer_simu->set_w(260);
+    GLUI_Panel *fix = new GLUI_Panel(simu_rollout,"");
+    GLUI_Panel *dt_panel = glui->add_panel_to_panel(fix, "Time Step");
     dt_text = glui->add_statictext_to_panel(dt_panel, "");
     new GLUI_Button(dt_panel, "Increase", DT_INCREASE_ID, control_cb);
     new GLUI_Button(dt_panel, "Decrease", DT_DECREASE_ID, control_cb);
 
-    glui->add_column_to_panel(simu_rollout, false);
+    glui->add_column_to_panel(fix, false);
 
-    GLUI_Panel *visc_panel = new GLUI_Panel (simu_rollout, "Fluid Viscosity");
+    GLUI_Panel *visc_panel = glui->add_panel_to_panel(fix, "Fluid Viscosity");
     visc_text = glui->add_statictext_to_panel(visc_panel, "");
     new GLUI_Button(visc_panel, "Increase", FV_INCREASE_ID, control_cb);
     new GLUI_Button(visc_panel, "Decrease", FV_DECREASE_ID, control_cb);
 
+    simu_rollout->close();
+
     // Matter Parameters
-    GLUI_Panel *matter_rollout = glui->add_rollout("Matter", true);
-    matter_rollout->set_w(1000);
+    GLUI_Rollout *matter_rollout = glui->add_rollout("Matter", true);
+    GLUI_StaticText *spacer_matter = glui->add_statictext_to_panel(matter_rollout, "");
+    spacer_matter->set_w(260);
     glui->add_checkbox_to_panel(matter_rollout, "Enable Matter", &draw_smoke, 0, control_cb);
 
     GLUI_Panel *dataset_panel = new GLUI_Panel (matter_rollout, "Dataset Selection");
@@ -307,8 +312,12 @@ void init_control_window()
     glui->add_edittext_to_panel(clamp_ro, "MAX", GLUI_EDITTEXT_FLOAT, &clamp_max);
     glui->add_checkbox_to_panel(clamp_ro, "Scaling", &scaling_flag, 0, control_cb);
 
+    matter_rollout->close();
+
     // Glyphs Parameters
     GLUI_Rollout *glyph_rollout = glui->add_rollout("Glyphs", true);
+    GLUI_StaticText *spacer_glyph = glui->add_statictext_to_panel(glyph_rollout, "");
+    spacer_glyph->set_w(260);
     glui->add_checkbox_to_panel(glyph_rollout, "Enable Glyphs", &draw_glyphs_flag, 0, control_cb);
 
     GLUI_Listbox *vector_dataset_lb = glui->add_listbox_to_panel(glyph_rollout, "Vector Field:", &glyphs.vector_field);
@@ -340,6 +349,8 @@ void init_control_window()
     y_sample_text = glui->add_statictext_to_panel(sample_panel, "");
     new GLUI_Button(sample_panel, "Increase", SY_INCREASE_ID, control_cb);
     new GLUI_Button(sample_panel, "Decrease", SY_DECREASE_ID, control_cb);
+    glyph_rollout->close();
+
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
