@@ -22,6 +22,7 @@ int color_dir = 0;            //use direction color-coding or not
 float vec_scale = 1000;			//scaling of hedgehogs
 int draw_smoke = 1;           //draw the smoke or not
 int draw_glyphs_flag = 0;            //draw the vector field or not
+int draw_isolines_flag = 0;
 int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
 int frozen = 0;               //toggles on/off the animation
 int quantize_colormap = 0;

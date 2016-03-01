@@ -351,6 +351,11 @@ void init_control_window()
     new GLUI_Button(sample_panel, "Decrease", SY_DECREASE_ID, control_cb);
     glyph_rollout->close();
 
+    GLUI_Rollout *iso_rollout = glui->add_rollout ("Isolines", true);
+    GLUI_StaticText *spacer_iso = glui->add_statictext_to_panel(iso_rollout, "");
+    spacer_iso->set_w(260);
+    glui->add_checkbox_to_panel(iso_rollout, "Enable Isolines", &draw_isolines_flag, 0, control_cb);
+    iso_rollout->close();
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
