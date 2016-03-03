@@ -92,7 +92,7 @@ void set_colormap(double vy)
 }
 
 
-void draw_colormap()
+void draw_colorbar()
 {
     double n_samples = 256;
 
@@ -138,24 +138,45 @@ void draw_colormap()
 }
 
 
-void draw_isolines()
+void draw_isolines(double *dataset)
 {
     double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
     double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
 
-    glBegin(GL_LINES);
     for(vector<Isoline>::iterator iso_it = isoline_manager.isoline_vector.begin(); iso_it != isoline_manager.isoline_vector.end(); ++iso_it)
     {
-        for(vector<pair<float, float> >::iterator points_it = iso_it->points.begin(); points_it != iso_it->points.end(); ++points_it)
+        for(vector<pair<float, float> >::iterator points_it = iso_it->points.begin(); points_it != iso_it->points.end(); points_it+=2)
         {
-            //color_glyph(round(iso_it.points_it.first), round(iso_it.points_it.second));
             glColor3f(1,1,1);
-            float px = wn + (float)points_it->second * wn;
-            float py = hn + (float)points_it->first * hn;
-            glVertex2f(px,py);
+            float x1 = points_it->second;
+            float y1 = points_it->first;
+            float x2 = (points_it+1)->second;
+            float y2 = (points_it+1)->first;
+
+
+            float p1x = wn + (float)points_it->second * wn;
+            float p1y = hn + (float)points_it->first * hn;
+
+            float p2x = wn + (float)(points_it+1)->second * wn;
+            float p2y = hn + (float)(points_it+1)->first * hn;
+
+
+            double d = sqrt(pow((x1-x2),2) + pow((y1-y2),2));
+
+            if (d < 5)//
+            {
+                glBegin(GL_LINES);
+                set_colormap(iso_it->v);
+                glVertex2f(p1x,p1y);
+                glVertex2f(p2x,p2y);
+                glEnd();
+            }
+            else
+            {
+                continue;
+            }
        }
     }
-    glEnd();
 
 }
 
@@ -222,10 +243,9 @@ void visualize(void)
         if(isoline_manager.isoline_vector.empty())
             isoline_manager.create_isoline();
         isoline_manager.compute_isolines();
-        draw_isolines();
+        draw_isolines(dataset);
     }
 
-    // draw colorbar
-    draw_colormap();
+    draw_colorbar();
 
 }

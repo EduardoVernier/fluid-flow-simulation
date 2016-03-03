@@ -1,20 +1,24 @@
 // button/checkbox/listbox ids
-#define DT_INCREASE_ID 200
-#define DT_DECREASE_ID 201
-#define HH_INCREASE_ID 202
-#define HH_DECREASE_ID 203
-#define FV_INCREASE_ID 204
-#define FV_DECREASE_ID 205
-#define PP_ID 206
-#define QT_ID 207
-#define CLAMPING_ID 208
-#define SCALING_ID 209
-#define QUANT_ID 210
-#define SX_INCREASE_ID 220
-#define SX_DECREASE_ID 221
-#define SY_INCREASE_ID 222
-#define SY_DECREASE_ID 223
-#define ENABLE_GLYPHS 302
+enum UI_IDs
+{
+DT_INCREASE_ID = 1000,
+DT_DECREASE_ID,
+HH_INCREASE_ID,
+HH_DECREASE_ID,
+FV_INCREASE_ID,
+FV_DECREASE_ID,
+PP_ID,
+QT_ID,
+CLAMPING_ID,
+SCALING_ID,
+QUANT_ID,
+SX_INCREASE_ID,
+SX_DECREASE_ID,
+SY_INCREASE_ID,
+SY_DECREASE_ID,
+ENABLE_GLYPHS,
+APPLY_ISOLINES
+};
 
 // statictext objects pointers are global because control_cb callback
 // function can't handle arguments except int values
@@ -186,10 +190,10 @@ void control_cb(int control)
         switch (control)
         {
         case DT_INCREASE_ID:
-            dt += 0.01;
+            dt += 0.02;
             break;
         case DT_DECREASE_ID:
-            dt -= 0.01;
+            dt -= 0.02;
             break;
         case HH_INCREASE_ID:
             glyphs.vec_scale *= 1.1;
@@ -227,6 +231,9 @@ void control_cb(int control)
             break;
         case SY_DECREASE_ID:
             glyphs.y_axis_samples--;
+            break;
+        case APPLY_ISOLINES:
+            isoline_manager.reset();
             break;
         }
 
@@ -338,6 +345,8 @@ void init_control_window()
     glui->add_edittext_to_panel(iso_rollout, "v1", GLUI_EDITTEXT_FLOAT, &isoline_manager.v1);
     glui->add_edittext_to_panel(iso_rollout, "v2", GLUI_EDITTEXT_FLOAT, &isoline_manager.v2);
     glui->add_edittext_to_panel(iso_rollout, "n" , GLUI_EDITTEXT_INT,   &isoline_manager.n);
+    new GLUI_Button(iso_rollout, "Apply paramenters", APPLY_ISOLINES, control_cb);
+
 
     iso_rollout->close();
 

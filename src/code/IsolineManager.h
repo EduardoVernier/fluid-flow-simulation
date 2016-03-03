@@ -15,6 +15,7 @@ public:
     IsolineManager();
     void create_isoline();
     void compute_isolines();
+    void reset();
 
     vector <Isoline> isoline_vector;
     float v1, v2;
