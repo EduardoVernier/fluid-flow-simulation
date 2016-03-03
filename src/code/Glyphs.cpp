@@ -1,33 +1,11 @@
 #include "Glyphs.h"
-
-// scalar field selector id on listbox
-#define SF_RHO_ID 150
-#define SF_VELOC_ID 151
-#define SF_FORCE_ID 152
-#define SF_DIR_ID 162
-#define SF_WHITE_ID 163
-// vector fields ids
-#define VF_VELOC_ID 160
-#define VF_FORCE_ID 161
-// glyph type ids
-#define GLYPH_LINE 170
-#define GLYPH_ARROW 171
-#define GLYPH_NEEDLE 172
-// colormap defines
-#define COLOR_BLACKWHITE 100
-#define COLOR_RAINBOW 101
-#define COLOR_BANDS 102
-#define COLOR_FIRE 103
-#define COLOR_CUSTOM 104
-
 #define PI 3.14159265
-
 
 Glyphs::Glyphs()
 {
     glyph_type = GLYPH_ARROW;
-    scalar_field = SF_RHO_ID;
-    vector_field = VF_VELOC_ID;
+    scalar_field = SCALAR_RHO;
+    vector_field = VECTOR_VELOC;
     vec_scale = 1300;
     x_axis_samples = 15;
     y_axis_samples = 15;
@@ -40,12 +18,12 @@ void Glyphs::draw_glyphs()
     double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
     double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
 
-    if (vector_field == VF_VELOC_ID)
+    if (vector_field == VECTOR_VELOC)
     {
         vf_x = vx;
         vf_y = vy;
     }
-    else if (VF_FORCE_ID)
+    else if (VECTOR_FORCE)
     {
         vf_x = fx;
         vf_y = fy;
@@ -165,19 +143,19 @@ void Glyphs::color_glyph(int i, int j)
 {
     int idx = (j * DIM) + i;
     switch (scalar_field) {
-    case SF_WHITE_ID:
+    case SCALAR_WHITE:
         glColor3f(1,1,1);
         break;
-    case SF_DIR_ID:
+    case SCALAR_DIR:
         direction_to_color(vf_x[idx],vf_y[idx]);
         break;
-    case SF_RHO_ID:
+    case SCALAR_RHO:
         set_colormap(rho[idx]);
         break;
-    case SF_VELOC_ID:
+    case SCALAR_VELOC_MAG:
         set_colormap(v_mag[idx]);
         break;
-    case SF_FORCE_ID:
+    case SCALAR_FORCE_MAG:
         set_colormap(f_mag[idx]);
         break;
     }

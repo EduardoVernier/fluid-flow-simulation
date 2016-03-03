@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #include <math.h>
 
+#include "Globals.cpp"
 #include "Color.cpp"
 #include "ColorMap.h"
 

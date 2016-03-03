@@ -1,9 +1,3 @@
-#define SCALAR_RHO 150
-#define SCALAR_VELOC_MAG 151
-#define SCALAR_FORCE_MAG 152
-#define SCALAR_VELOC_DIV 153
-#define SCALAR_FORCE_DIV 154
-
 
 int DIM = 50; 					//size of simulation grid
 float dt = 0.4;                 //simulation time step

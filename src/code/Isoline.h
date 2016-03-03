@@ -1,19 +1,25 @@
 #ifndef ISOLINE_H
 #define ISOLINE_H
 
-#import <vector>
+using namespace std;
 
+#include <vector>
+extern int DIM;
 
-class Isolines
+class Isoline
 {
-    Isolines(float _v, double *_sfp) : v(_v), spf(_sfp) {};
-    void recompute_isoline ();
+private:
+    void find_point(int ih, int il);
+
+public:
+    Isoline(float _v, double *_sfp) : v(_v), sfp(_sfp) {};
+    void compute_isoline();
     // TODO: implement destructor freeing the vector
 
     float v;
     double *sfp; // current scalar field pointer (e.g. rho)
-    vector<float[2]> points;
-}
+    vector<pair<float, float> > points;
+};
 
 
 #endif

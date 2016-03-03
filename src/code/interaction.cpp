@@ -1,25 +1,3 @@
-// colormap button ids
-#define CM_BW_ID 100
-#define CM_RB_ID 101
-#define CM_BD_ID 102
-#define CM_FIRE_ID 103
-#define CM_CUST_ID 104
-// scalar field selector id on listbox
-#define SF_RHO_ID 150
-#define SF_VELOC_MAG_ID 151
-#define SF_FORCE_MAG_ID 152
-#define SF_VELOC_DIV_ID 153
-#define SF_FORCE_DIV_ID 154
-
-#define SF_DIR_ID 162
-#define SF_WHITE_ID 163
-// vector fields ids
-#define VF_VELOC_ID 160
-#define VF_FORCE_ID 161
-// glyph type ids
-#define GLYPH_LINE 170
-#define GLYPH_ARROW 171
-#define GLYPH_NEEDLE 172
 // button/checkbox/listbox ids
 #define DT_INCREASE_ID 200
 #define DT_DECREASE_ID 201
@@ -36,7 +14,6 @@
 #define SX_DECREASE_ID 221
 #define SY_INCREASE_ID 222
 #define SY_DECREASE_ID 223
-
 #define ENABLE_GLYPHS 302
 
 // statictext objects pointers are global because control_cb callback
@@ -85,7 +62,7 @@ void keyboard(unsigned char key, int x, int y)
         if (draw_smoke==0) draw_glyphs_flag = 1; break;
     case 'y': draw_glyphs_flag = 1 - draw_glyphs_flag;
         if (draw_glyphs_flag==0) draw_smoke = 1; break;
-    case 'm': scalar_col++; if (scalar_col>COLOR_BANDS) scalar_col=COLOR_BLACKWHITE; break;
+    //case 'm': scalar_col++; if (scalar_col>COLOR_BANDS) scalar_col=COLOR_BLACKWHITE; break;
     case 'a': frozen = 1-frozen; break;
     case 'q': exit(0);
     }
@@ -229,13 +206,12 @@ void control_cb(int control)
         case QT_ID:
             exit(0);
             break;
-        case CM_CUST_ID:
+        case COLOR_CUSTOM:
             glutTimerFunc(100, resume, 1);
             handle_custom_colormap();
-        case CM_BD_ID:
-        case CM_RB_ID:
-        case CM_BW_ID:
-        case CM_FIRE_ID:
+        case COLOR_RAINBOW:
+        case COLOR_BLACKWHITE:
+        case COLOR_FIRE:
             scalar_col = control;
             break;
         case QUANT_ID:
@@ -269,7 +245,8 @@ void init_control_window()
     // Simulation Parameters
     GLUI_Rollout *simu_rollout = glui->add_rollout ("Simulation", true);
     GLUI_StaticText *spacer_simu = glui->add_statictext_to_panel(simu_rollout, "");
-    spacer_simu->set_w(260);
+    spacer_simu->set_w(260); // Ugly trick to make panels have the width I desire
+    spacer_simu->set_h(0);
     GLUI_Panel *fix = new GLUI_Panel(simu_rollout,"");
     GLUI_Panel *dt_panel = glui->add_panel_to_panel(fix, "Time Step");
     dt_text = glui->add_statictext_to_panel(dt_panel, "");
@@ -289,21 +266,22 @@ void init_control_window()
     GLUI_Rollout *matter_rollout = glui->add_rollout("Matter", true);
     GLUI_StaticText *spacer_matter = glui->add_statictext_to_panel(matter_rollout, "");
     spacer_matter->set_w(260);
+    spacer_matter->set_h(0);
     glui->add_checkbox_to_panel(matter_rollout, "Enable Matter", &draw_smoke, 0, control_cb);
 
     GLUI_Panel *dataset_panel = new GLUI_Panel (matter_rollout, "Dataset Selection");
     GLUI_Listbox *matter_dataset_lb = glui->add_listbox_to_panel(dataset_panel, "", &dataset_id);
-    matter_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
-    matter_dataset_lb->add_item(SF_VELOC_MAG_ID, "Fluid Velocity Magnitude");
-    matter_dataset_lb->add_item(SF_FORCE_MAG_ID, "Force Field Magnitude");
-    matter_dataset_lb->add_item(SF_VELOC_DIV_ID, "Velocity Field Divergency");
-    matter_dataset_lb->add_item(SF_FORCE_DIV_ID, "Force Field Divergency");
+    matter_dataset_lb->add_item(SCALAR_RHO, "Fluid Density");
+    matter_dataset_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
+    matter_dataset_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
+    matter_dataset_lb->add_item(SCALAR_VELOC_DIV, "Velocity Field Divergency");
+    matter_dataset_lb->add_item(SCALAR_FORCE_DIV, "Force Field Divergency");
 
     GLUI_Panel *color_panel = new GLUI_Panel (matter_rollout, "Color Mapping");
-    new GLUI_Button(color_panel, "Black and White", CM_BW_ID, control_cb);
-    new GLUI_Button(color_panel, "Rainbow", CM_RB_ID, control_cb);
-    new GLUI_Button(color_panel, "Fire", CM_FIRE_ID, control_cb);
-    new GLUI_Button(color_panel, "Custom", CM_CUST_ID, control_cb);
+    new GLUI_Button(color_panel, "Black and White", COLOR_BLACKWHITE, control_cb);
+    new GLUI_Button(color_panel, "Rainbow", COLOR_RAINBOW, control_cb);
+    new GLUI_Button(color_panel, "Fire", COLOR_FIRE, control_cb);
+    new GLUI_Button(color_panel, "Custom", COLOR_CUSTOM, control_cb);
     glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap);
 
     GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_rollout, "Options", true);
@@ -318,18 +296,19 @@ void init_control_window()
     GLUI_Rollout *glyph_rollout = glui->add_rollout("Glyphs", true);
     GLUI_StaticText *spacer_glyph = glui->add_statictext_to_panel(glyph_rollout, "");
     spacer_glyph->set_w(260);
+    spacer_glyph->set_h(0);
     glui->add_checkbox_to_panel(glyph_rollout, "Enable Glyphs", &draw_glyphs_flag, 0, control_cb);
 
     GLUI_Listbox *vector_dataset_lb = glui->add_listbox_to_panel(glyph_rollout, "Vector Field:", &glyphs.vector_field);
-    vector_dataset_lb->add_item(VF_VELOC_ID, "Fluid Velocity Field");
-    vector_dataset_lb->add_item(VF_FORCE_ID, "Force Field");
+    vector_dataset_lb->add_item(VECTOR_VELOC, "Fluid Velocity Field");
+    vector_dataset_lb->add_item(VECTOR_FORCE, "Force Field");
 
     GLUI_Listbox *scalar_dataset_lb = glui->add_listbox_to_panel(glyph_rollout, "Colormap:", &glyphs.scalar_field);
-    scalar_dataset_lb->add_item(SF_RHO_ID, "Fluid Density");
-    scalar_dataset_lb->add_item(SF_VELOC_MAG_ID, "Fluid Velocity Magnitude");
-    scalar_dataset_lb->add_item(SF_FORCE_MAG_ID, "Force Field Magnitude");
-    scalar_dataset_lb->add_item(SF_DIR_ID, "Vector Direction");
-    scalar_dataset_lb->add_item(SF_WHITE_ID, "White");
+    scalar_dataset_lb->add_item(SCALAR_RHO, "Fluid Density");
+    scalar_dataset_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
+    scalar_dataset_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
+    scalar_dataset_lb->add_item(SCALAR_DIR, "Vector Direction");
+    scalar_dataset_lb->add_item(SCALAR_WHITE, "White");
 
     GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_rollout, "Glypth Type:", &glyphs.glyph_type);
     glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");
@@ -354,7 +333,12 @@ void init_control_window()
     GLUI_Rollout *iso_rollout = glui->add_rollout ("Isolines", true);
     GLUI_StaticText *spacer_iso = glui->add_statictext_to_panel(iso_rollout, "");
     spacer_iso->set_w(260);
+    spacer_iso->set_h(0);
     glui->add_checkbox_to_panel(iso_rollout, "Enable Isolines", &draw_isolines_flag, 0, control_cb);
+    glui->add_edittext_to_panel(iso_rollout, "v1", GLUI_EDITTEXT_FLOAT, &isoline_manager.v1);
+    glui->add_edittext_to_panel(iso_rollout, "v2", GLUI_EDITTEXT_FLOAT, &isoline_manager.v2);
+    glui->add_edittext_to_panel(iso_rollout, "n" , GLUI_EDITTEXT_INT,   &isoline_manager.n);
+
     iso_rollout->close();
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);

@@ -1006,3 +1006,7 @@ src/code/simulation.cpp
 src/code/visualization.cpp
 src/code/Glyphs.h
 src/code/Glyphs.cpp
+src/code/Isoline.cpp
+src/code/Isoline.h
+src/code/IsolineManager.cpp
+src/code/IsolineManager.h

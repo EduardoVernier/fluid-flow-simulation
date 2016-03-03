@@ -15,9 +15,12 @@ using namespace std;
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "Globals.cpp"
+
 #include "simulation.cpp"
 #include "visualization.cpp"
 #include "interaction.cpp"
+
 
 
 int main(int argc, char **argv)

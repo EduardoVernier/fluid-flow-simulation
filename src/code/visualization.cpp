@@ -1,19 +1,7 @@
 #include "Color.cpp"
 #include "ColorMap.h"
 #include "Glyphs.h"
-
-// different types of color mapping: black-and-white, rainbow, fire or custom
-#define COLOR_BLACKWHITE 100
-#define COLOR_RAINBOW 101
-#define COLOR_BANDS 102
-#define COLOR_FIRE 103
-#define COLOR_CUSTOM 104
-// scalar field selected to be displayed as matter
-#define SCALAR_RHO 150
-#define SCALAR_VELOC_MAG 151
-#define SCALAR_FORCE_MAG 152
-#define SCALAR_VELOC_DIV 153
-#define SCALAR_FORCE_DIV 154
+#include "IsolineManager.h"
 
 
 int main_window;
@@ -45,11 +33,13 @@ ColorMap custom = ColorMap((char*)"Custom");
 int custom_color_index = 0;
 float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 interpolations on a custom colormap
 
-Glyphs glyphs = Glyphs(); // singleton
+// singletons (silly lines of code)
+Glyphs glyphs = Glyphs();
+IsolineManager isoline_manager = IsolineManager();
 
-// Example of how to "build" a colormap
 void init_colormaps()
 {
+    // Example of how to "build" a colormap
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
     fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
     fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
@@ -204,7 +194,10 @@ void visualize(void)
     if (draw_glyphs_flag)
         glyphs.draw_glyphs();
 
-    // draw colormap
+    if (draw_isolines_flag)
+        isoline_manager.compute_isolines();
+
+    // draw colorbar
     draw_colormap();
 
 }
