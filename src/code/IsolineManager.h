@@ -13,6 +13,7 @@ class IsolineManager
 {
 public:
     IsolineManager();
+    void create_isoline();
     void compute_isolines();
 
     vector <Isoline> isoline_vector;

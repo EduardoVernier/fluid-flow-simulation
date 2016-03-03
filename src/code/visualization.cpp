@@ -43,6 +43,7 @@ void init_colormaps()
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
     fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
     fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
+
 }
 
 
@@ -136,6 +137,28 @@ void draw_colormap()
     }
 }
 
+
+void draw_isolines()
+{
+    double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
+    double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
+
+    glBegin(GL_LINES);
+    for(vector<Isoline>::iterator iso_it = isoline_manager.isoline_vector.begin(); iso_it != isoline_manager.isoline_vector.end(); ++iso_it)
+    {
+        for(vector<pair<float, float> >::iterator points_it = iso_it->points.begin(); points_it != iso_it->points.end(); ++points_it)
+        {
+            //color_glyph(round(iso_it.points_it.first), round(iso_it.points_it.second));
+            glColor3f(1,1,1);
+            float px = wn + (float)points_it->second * wn;
+            float py = hn + (float)points_it->first * hn;
+            glVertex2f(px,py);
+       }
+    }
+    glEnd();
+
+}
+
 //visualize: This is the main visualization function
 void visualize(void)
 {
@@ -195,7 +218,12 @@ void visualize(void)
         glyphs.draw_glyphs();
 
     if (draw_isolines_flag)
+    {
+        if(isoline_manager.isoline_vector.empty())
+            isoline_manager.create_isoline();
         isoline_manager.compute_isolines();
+        draw_isolines();
+    }
 
     // draw colorbar
     draw_colormap();

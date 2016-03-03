@@ -2,6 +2,7 @@
 
 void Isoline::compute_isoline()
 {
+    points.clear();
     for (int i = 0; i < DIM; ++i)
     {
         for (int j = 0; j < DIM; ++j)
@@ -18,6 +19,7 @@ void Isoline::compute_isoline()
 // Implementation of book algorithm
 void Isoline::find_point(int ih, int il)
 {
+
     // ih - higher sf value, il - lower sf value
     if (sfp[ih] < sfp[il])
     {
