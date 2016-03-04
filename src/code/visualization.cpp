@@ -3,7 +3,6 @@
 #include "Glyphs.h"
 #include "IsolineManager.h"
 
-
 int main_window;
 int winWidth, winHeight;        //size of the graphics window, in pixels
 int color_dir = 0;            //use direction color-coding or not
@@ -11,7 +10,8 @@ float vec_scale = 1000;			//scaling of hedgehogs
 int draw_smoke = 1;           //draw the smoke or not
 int draw_glyphs_flag = 0;            //draw the vector field or not
 int draw_isolines_flag = 0;
-int scalar_col = COLOR_BLACKWHITE;  //method for scalar coloring
+int scalar_colormap = COLOR_BLACKWHITE;  //method for scalar coloring
+int isoline_colormap = COLOR_RAINBOW;
 int frozen = 0;               //toggles on/off the animation
 int quantize_colormap = 0;
 
@@ -43,12 +43,11 @@ void init_colormaps()
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
     fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
     fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
-
 }
 
 
-//set_colormap: Sets three different types of colormaps
-void set_colormap(double vy)
+//set_color: Sets three different types of colormaps
+void set_color(double vy, int colormap)
 {
     Color c;
     double out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
@@ -63,7 +62,7 @@ void set_colormap(double vy)
     if (scaling_flag)
         vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
 
-/*
+
     glShadeModel(GL_SMOOTH);
     if(quantize_colormap != 0)
     {
@@ -72,8 +71,8 @@ void set_colormap(double vy)
         vy = (int)(vy);
         vy/= quantize_colormap;
     }
-*/
-    switch(scalar_col)
+
+    switch(colormap)
     {
     case COLOR_BLACKWHITE:
         c = Color(vy,vy,vy);
@@ -111,7 +110,7 @@ void draw_colorbar()
         colorbar_max *=1.1;
 
         double current_value = colorbar_min + (i/n_samples)*(colorbar_max-colorbar_min);
-        set_colormap(current_value);
+        set_color(current_value, scalar_colormap);
         glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
                 0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
 
@@ -132,7 +131,6 @@ void draw_colorbar()
             glMatrixMode( GL_PROJECTION );
             glPopMatrix();
             glMatrixMode( GL_MODELVIEW );
-
         }
     }
 }
@@ -147,34 +145,18 @@ void draw_isolines(double *dataset)
     {
         for(vector<pair<float, float> >::iterator points_it = iso_it->points.begin(); points_it != iso_it->points.end(); points_it+=2)
         {
-            glColor3f(1,1,1);
-            float x1 = points_it->second;
-            float y1 = points_it->first;
-            float x2 = (points_it+1)->second;
-            float y2 = (points_it+1)->first;
-
-
             float p1x = wn + (float)points_it->second * wn;
             float p1y = hn + (float)points_it->first * hn;
 
             float p2x = wn + (float)(points_it+1)->second * wn;
             float p2y = hn + (float)(points_it+1)->first * hn;
 
+            glBegin(GL_LINES);
+            set_color(iso_it->v, isoline_colormap);
+            glVertex2f(p1x,p1y);
+            glVertex2f(p2x,p2y);
+            glEnd();
 
-            double d = sqrt(pow((x1-x2),2) + pow((y1-y2),2));
-
-            if (d < 5)//
-            {
-                glBegin(GL_LINES);
-                set_colormap(iso_it->v);
-                glVertex2f(p1x,p1y);
-                glVertex2f(p2x,p2y);
-                glEnd();
-            }
-            else
-            {
-                continue; // test
-            }
        }
     }
 
@@ -198,50 +180,40 @@ void visualize(void)
 
     if (draw_smoke)
     {
-        if(quantize_colormap != 0)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        for (int j = 0; j < DIM - 1; j++)
         {
-            isoline_manager.v1 = 0.001;
-            isoline_manager.v2 = 0.999;
-            isoline_manager.n = quantize_colormap;
-            isoline_manager.reset();
-        }
-        else
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            for (int j = 0; j < DIM - 1; j++)
+            double px,py;
+            glBegin(GL_TRIANGLE_STRIP);
+
+            int i = 0;
+            px = wn + (fftw_real)i * wn;
+            py = hn + (fftw_real)j * hn;
+            int idx = (j * DIM) + i;
+            set_color(dataset[idx], scalar_colormap);
+            glVertex2f(px,py);
+
+            for (i = 0; i < DIM - 1; i++)
             {
-                double px,py;
-                glBegin(GL_TRIANGLE_STRIP);
-
-                int i = 0;
                 px = wn + (fftw_real)i * wn;
-                py = hn + (fftw_real)j * hn;
-                int idx = (j * DIM) + i;
-                set_colormap(dataset[idx]);
-                glVertex2f(px,py);
-
-                for (i = 0; i < DIM - 1; i++)
-                {
-                    px = wn + (fftw_real)i * wn;
-                    py = hn + (fftw_real)(j + 1) * hn;
-                    idx = ((j + 1) * DIM) + i;
-                    set_colormap(dataset[idx]);
-                    glVertex2f(px, py);
-                    px = wn + (fftw_real)(i + 1) * wn;
-                    py = hn + (fftw_real)j * hn;
-                    idx = (j * DIM) + (i + 1);
-                    set_colormap(dataset[idx]);
-                    glVertex2f(px, py);
-                }
-
-                px = wn + (fftw_real)(DIM - 1) * wn;
                 py = hn + (fftw_real)(j + 1) * hn;
-                idx = ((j + 1) * DIM) + (DIM - 1);
-                set_colormap(dataset[idx]);
+                idx = ((j + 1) * DIM) + i;
+                set_color(dataset[idx], scalar_colormap);
                 glVertex2f(px, py);
-
-                glEnd();
+                px = wn + (fftw_real)(i + 1) * wn;
+                py = hn + (fftw_real)j * hn;
+                idx = (j * DIM) + (i + 1);
+                set_color(dataset[idx], scalar_colormap);
+                glVertex2f(px, py);
             }
+
+            px = wn + (fftw_real)(DIM - 1) * wn;
+            py = hn + (fftw_real)(j + 1) * hn;
+            idx = ((j + 1) * DIM) + (DIM - 1);
+            set_color(dataset[idx], scalar_colormap);
+            glVertex2f(px, py);
+
+            glEnd();
         }
     }
 

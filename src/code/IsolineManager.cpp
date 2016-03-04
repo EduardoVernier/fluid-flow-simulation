@@ -2,9 +2,9 @@
 
 IsolineManager::IsolineManager()
 {
-    v1 = 0.3;
-    v2 = 0.3;
-    n = 1;
+    v1 = 0.1;
+    v2 = 0.8;
+    n = 5;
 
 }
 

@@ -66,7 +66,7 @@ void keyboard(unsigned char key, int x, int y)
         if (draw_smoke==0) draw_glyphs_flag = 1; break;
     case 'y': draw_glyphs_flag = 1 - draw_glyphs_flag;
         if (draw_glyphs_flag==0) draw_smoke = 1; break;
-    //case 'm': scalar_col++; if (scalar_col>COLOR_BANDS) scalar_col=COLOR_BLACKWHITE; break;
+    //case 'm': scalar_colormap++; if (scalar_colormap>COLOR_BANDS) scalar_colormap=COLOR_BLACKWHITE; break;
     case 'a': frozen = 1-frozen; break;
     case 'q': exit(0);
     }
@@ -216,7 +216,7 @@ void control_cb(int control)
         case COLOR_RAINBOW:
         case COLOR_BLACKWHITE:
         case COLOR_FIRE:
-            scalar_col = control;
+            scalar_colormap = control;
             break;
         case QUANT_ID:
             break;
@@ -285,10 +285,12 @@ void init_control_window()
     matter_dataset_lb->add_item(SCALAR_FORCE_DIV, "Force Field Divergency");
 
     GLUI_Panel *color_panel = new GLUI_Panel (matter_rollout, "Color Mapping");
-    new GLUI_Button(color_panel, "Black and White", COLOR_BLACKWHITE, control_cb);
-    new GLUI_Button(color_panel, "Rainbow", COLOR_RAINBOW, control_cb);
-    new GLUI_Button(color_panel, "Fire", COLOR_FIRE, control_cb);
-    new GLUI_Button(color_panel, "Custom", COLOR_CUSTOM, control_cb);
+    GLUI_Listbox *scalar_colormap_lb = glui->add_listbox_to_panel(color_panel, "Colormap: ", &scalar_colormap);
+    scalar_colormap_lb->add_item(COLOR_BLACKWHITE, "Greyscale");
+    scalar_colormap_lb->add_item(COLOR_RAINBOW, "Rainbow");
+    scalar_colormap_lb->add_item(COLOR_FIRE, "Fire");
+    scalar_colormap_lb->add_item(COLOR_CUSTOM, "Custom");
+    new GLUI_Button(color_panel, "Edit custom colormap", COLOR_CUSTOM, control_cb);
     glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap);
 
     GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_rollout, "Options", true);
@@ -310,12 +312,12 @@ void init_control_window()
     vector_dataset_lb->add_item(VECTOR_VELOC, "Fluid Velocity Field");
     vector_dataset_lb->add_item(VECTOR_FORCE, "Force Field");
 
-    GLUI_Listbox *scalar_dataset_lb = glui->add_listbox_to_panel(glyph_rollout, "Colormap:", &glyphs.scalar_field);
-    scalar_dataset_lb->add_item(SCALAR_RHO, "Fluid Density");
-    scalar_dataset_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
-    scalar_dataset_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
-    scalar_dataset_lb->add_item(SCALAR_DIR, "Vector Direction");
-    scalar_dataset_lb->add_item(SCALAR_WHITE, "White");
+    GLUI_Listbox *scalar_dataset_glyph_lb = glui->add_listbox_to_panel(glyph_rollout, "Colormap value:", &glyphs.scalar_field);
+    scalar_dataset_glyph_lb->add_item(SCALAR_RHO, "Fluid Density");
+    scalar_dataset_glyph_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
+    scalar_dataset_glyph_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
+    scalar_dataset_glyph_lb->add_item(SCALAR_DIR, "Vector Direction");
+    scalar_dataset_glyph_lb->add_item(SCALAR_WHITE, "White");
 
     GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_rollout, "Glypth Type:", &glyphs.glyph_type);
     glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");
@@ -345,6 +347,11 @@ void init_control_window()
     glui->add_edittext_to_panel(iso_rollout, "v1", GLUI_EDITTEXT_FLOAT, &isoline_manager.v1);
     glui->add_edittext_to_panel(iso_rollout, "v2", GLUI_EDITTEXT_FLOAT, &isoline_manager.v2);
     glui->add_edittext_to_panel(iso_rollout, "n" , GLUI_EDITTEXT_INT,   &isoline_manager.n);
+    GLUI_Listbox *scalar_dataset_lb = glui->add_listbox_to_panel(iso_rollout, "Colormap: ", &isoline_colormap);
+    scalar_dataset_lb->add_item(COLOR_BLACKWHITE, "Greyscale");
+    scalar_dataset_lb->add_item(COLOR_RAINBOW, "Rainbow");
+    scalar_dataset_lb->add_item(COLOR_FIRE, "Fire");
+    scalar_dataset_lb->add_item(COLOR_CUSTOM, "Custom");
     new GLUI_Button(iso_rollout, "Apply paramenters", APPLY_ISOLINES, control_cb);
 
 

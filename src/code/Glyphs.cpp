@@ -188,7 +188,7 @@ void Glyphs::set_colormap(float vy)
         vy/= quantize_colormap;
     }
 
-    switch(scalar_col)
+    switch(scalar_colormap)
     {
     case COLOR_BLACKWHITE:
         c = Color(vy,vy,vy);

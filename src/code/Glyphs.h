@@ -12,7 +12,7 @@ extern int winWidth, winHeight, DIM;
 extern double *vx, *vy, *v_mag, *fx, *fy, *f_mag, *rho;
 
 // All global variables that are required for glyph coloring (terrible OOP)
-extern int clamp_flag, scaling_flag, quantize_colormap, scalar_col;
+extern int clamp_flag, scaling_flag, quantize_colormap, scalar_colormap;
 extern float clamp_min, clamp_max, dataset_min, dataset_max;
 extern ColorMap rainbow, fire, custom;
 
