@@ -3,9 +3,9 @@
 void Isoline::compute_isoline()
 {
     points.clear();
-    for (int i = 0; i < DIM; ++i)
+    for (int i = 0; i < DIM-1; ++i)
     {
-        for (int j = 0; j < DIM; ++j)
+        for (int j = 0; j < DIM-1; ++j)
         {
             // check all 4 edges of cell
             find_point(i*DIM + j, i*DIM + j+1);

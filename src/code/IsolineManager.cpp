@@ -16,7 +16,6 @@ void IsolineManager::reset()
         Isoline t = Isoline(v1 + i*((v2-v1)/(float)n), rho);
         isoline_vector.push_back(t);
     }
-
 }
 
 void IsolineManager::create_isoline()

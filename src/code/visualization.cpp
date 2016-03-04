@@ -63,7 +63,7 @@ void set_colormap(double vy)
     if (scaling_flag)
         vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
 
-
+/*
     glShadeModel(GL_SMOOTH);
     if(quantize_colormap != 0)
     {
@@ -72,7 +72,7 @@ void set_colormap(double vy)
         vy = (int)(vy);
         vy/= quantize_colormap;
     }
-
+*/
     switch(scalar_col)
     {
     case COLOR_BLACKWHITE:
@@ -173,7 +173,7 @@ void draw_isolines(double *dataset)
             }
             else
             {
-                continue;
+                continue; // test
             }
        }
     }
@@ -198,40 +198,50 @@ void visualize(void)
 
     if (draw_smoke)
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        for (int j = 0; j < DIM - 1; j++)
+        if(quantize_colormap != 0)
         {
-            double px,py;
-            glBegin(GL_TRIANGLE_STRIP);
-
-            int i = 0;
-            px = wn + (fftw_real)i * wn;
-            py = hn + (fftw_real)j * hn;
-            int idx = (j * DIM) + i;
-            set_colormap(dataset[idx]);
-            glVertex2f(px,py);
-
-            for (i = 0; i < DIM - 1; i++)
+            isoline_manager.v1 = 0.001;
+            isoline_manager.v2 = 0.999;
+            isoline_manager.n = quantize_colormap;
+            isoline_manager.reset();
+        }
+        else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            for (int j = 0; j < DIM - 1; j++)
             {
+                double px,py;
+                glBegin(GL_TRIANGLE_STRIP);
+
+                int i = 0;
                 px = wn + (fftw_real)i * wn;
-                py = hn + (fftw_real)(j + 1) * hn;
-                idx = ((j + 1) * DIM) + i;
-                set_colormap(dataset[idx]);
-                glVertex2f(px, py);
-                px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
-                idx = (j * DIM) + (i + 1);
+                int idx = (j * DIM) + i;
+                set_colormap(dataset[idx]);
+                glVertex2f(px,py);
+
+                for (i = 0; i < DIM - 1; i++)
+                {
+                    px = wn + (fftw_real)i * wn;
+                    py = hn + (fftw_real)(j + 1) * hn;
+                    idx = ((j + 1) * DIM) + i;
+                    set_colormap(dataset[idx]);
+                    glVertex2f(px, py);
+                    px = wn + (fftw_real)(i + 1) * wn;
+                    py = hn + (fftw_real)j * hn;
+                    idx = (j * DIM) + (i + 1);
+                    set_colormap(dataset[idx]);
+                    glVertex2f(px, py);
+                }
+
+                px = wn + (fftw_real)(DIM - 1) * wn;
+                py = hn + (fftw_real)(j + 1) * hn;
+                idx = ((j + 1) * DIM) + (DIM - 1);
                 set_colormap(dataset[idx]);
                 glVertex2f(px, py);
+
+                glEnd();
             }
-
-            px = wn + (fftw_real)(DIM - 1) * wn;
-            py = hn + (fftw_real)(j + 1) * hn;
-            idx = ((j + 1) * DIM) + (DIM - 1);
-            set_colormap(dataset[idx]);
-            glVertex2f(px, py);
-
-            glEnd();
         }
     }
 
