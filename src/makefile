@@ -45,7 +45,7 @@ CPPFLAGS += -I/usr/X11R6/include
 
 #######################################
 
-GLUI_OBJS = glui_add_controls.o glui_string.o glui.o glui_bitmap_img_data.o glui_bitmaps.o glui_button.o glui_edittext.o glui_commandline.o glui_checkbox.o glui_node.o glui_radio.o glui_statictext.o glui_panel.o glui_separator.o glui_spinner.o glui_control.o glui_column.o glui_translation.o glui_rotation.o glui_mouse_iaction.o glui_listbox.o glui_rollout.o glui_window.o arcball.o algebra3.o quaternion.o viewmodel.o glui_treepanel.o glui_tree.o glui_textbox.o glui_scrollbar.o glui_list.o glui_filebrowser.o
+GLUI_OBJS = lib/glui_add_controls.o lib/glui_string.o lib/glui.o lib/glui_bitmap_img_data.o lib/glui_bitmaps.o lib/glui_button.o lib/glui_edittext.o lib/glui_commandline.o lib/glui_checkbox.o lib/glui_node.o lib/glui_radio.o lib/glui_statictext.o lib/glui_panel.o lib/glui_separator.o lib/glui_spinner.o lib/glui_control.o lib/glui_column.o lib/glui_translation.o lib/glui_rotation.o lib/glui_mouse_iaction.o lib/glui_listbox.o lib/glui_rollout.o lib/glui_window.o lib/arcball.o lib/algebra3.o lib/quaternion.o lib/viewmodel.o lib/glui_treepanel.o lib/glui_tree.o lib/glui_textbox.o lib/glui_scrollbar.o lib/glui_list.o lib/glui_filebrowser.o
 
 GLUI_LIB = lib/libglui.a
 
@@ -57,7 +57,8 @@ GLUI_TOOLS = bin/ppm2array
 
 .PHONY: all setup examples tools clean depend dist
 
-all: setup $(GLUI_LIB) examples
+#all: setup $(GLUI_LIB) examples
+all: examples
 
 setup:
 	mkdir -p bin
@@ -112,45 +113,4 @@ dist: clean
 	tar cv $(DIST) | gzip -9 - > $(DIST).tgz
 	rm -Rf $(DIST)
 
-# DO NOT DELETE THIS LINE -- make depend depends on it.
 
-./algebra3.o: algebra3.h glui_internal.h
-./arcball.o: arcball.h glui_internal.h algebra3.h quaternion.h
-./glui_button.o: ./include/GL/glui.h glui_internal.h
-./glui_checkbox.o: ./include/GL/glui.h glui_internal.h
-./glui_column.o: ./include/GL/glui.h glui_internal.h
-./glui_control.o: ./include/GL/glui.h glui_internal.h
-./glui_edittext.o: ./include/GL/glui.h glui_internal.h
-./glui_listbox.o: ./include/GL/glui.h glui_internal.h
-./glui_mouse_iaction.o: ./include/GL/glui.h glui_internal.h
-./glui_node.o: ./include/GL/glui.h glui_internal.h
-./glui_panel.o: ./include/GL/glui.h glui_internal.h
-./glui_radio.o: ./include/GL/glui.h glui_internal.h
-./glui_rollout.o: ./include/GL/glui.h glui_internal.h
-./glui_rotation.o: ./include/GL/glui.h arcball.h glui_internal.h algebra3.h
-./glui_rotation.o: quaternion.h
-./glui_separator.o: ./include/GL/glui.h glui_internal.h
-./glui_spinner.o: ./include/GL/glui.h glui_internal.h
-./glui_translation.o: ./include/GL/glui.h glui_internal.h algebra3.h
-./glui_window.o: ./include/GL/glui.h glui_internal.h
-./quaternion.o: quaternion.h algebra3.h glui_internal.h
-./viewmodel.o: viewmodel.h algebra3.h ./include/GL/glui.h
-./glui_bitmaps.o: ./include/GL/glui.h glui_internal.h
-./glui_statictext.o: ./include/GL/glui.h glui_internal.h
-./glui.o: ./include/GL/glui.h glui_internal.h
-./glui_add_controls.o: ./include/GL/glui.h glui_internal.h
-./glui_commandline.o: ./include/GL/glui.h glui_internal.h
-./glui_list.o: ./include/GL/glui.h glui_internal.h
-./glui_scrollbar.o: ./include/GL/glui.h glui_internal.h
-./glui_string.o: ./include/GL/glui.h
-./glui_textbox.o: ./include/GL/glui.h glui_internal.h
-./glui_tree.o: ./include/GL/glui.h glui_internal.h
-./glui_treepanel.o: ./include/GL/glui.h
-./example/example1.o: ./include/GL/glui.h
-./example/example2.o: ./include/GL/glui.h
-./example/example3.o: ./include/GL/glui.h
-./example/example4.o: ./include/GL/glui.h
-./example/example5.o: ./include/GL/glui.h
-./example/example6.o: ./include/GL/glui.h
-./tools/ppm2array.o: ./tools/ppm.hpp
-./glui_filebrowser.o: ./include/GL/glui.h glui_internal.h

@@ -156,10 +156,8 @@ void draw_isolines(double *dataset)
             glVertex2f(p1x,p1y);
             glVertex2f(p2x,p2y);
             glEnd();
-
        }
     }
-
 }
 
 //visualize: This is the main visualization function
