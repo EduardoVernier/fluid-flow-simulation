@@ -17,7 +17,8 @@ SX_DECREASE_ID,
 SY_INCREASE_ID,
 SY_DECREASE_ID,
 ENABLE_GLYPHS,
-APPLY_ISOLINES
+APPLY_ISOLINES,
+ENABLE_HEIGHT
 };
 
 // statictext objects pointers are global because control_cb callback
@@ -29,26 +30,6 @@ GLUI_StaticText *x_sample_text, *y_sample_text;
 GLUI *glui;
 GLUI *cust_window;
 
-//display: Handle window redrawing events. Simply delegates to visualize().
-void display(void)
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    visualize();
-    glFlush();
-    glutSwapBuffers();
-}
-
-//reshape: Handle window resizing (reshaping) events
-void reshape(int w, int h)
-{
-    glViewport(0.0f, 0.0f, (GLfloat)w, (GLfloat)h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
-    winWidth = w; winHeight = h;
-}
 
 //keyboard: Handle key presses
 void keyboard(unsigned char key, int x, int y)
@@ -62,10 +43,10 @@ void keyboard(unsigned char key, int x, int y)
     case 's': vec_scale *= 0.8; break;
     case 'V': visc *= 5; break;
     case 'v': visc *= 0.2; break;
-    case 'x': draw_smoke = 1 - draw_smoke;
-        if (draw_smoke==0) draw_glyphs_flag = 1; break;
+    case 'x': draw_matter = 1 - draw_matter;
+        if (draw_matter==0) draw_glyphs_flag = 1; break;
     case 'y': draw_glyphs_flag = 1 - draw_glyphs_flag;
-        if (draw_glyphs_flag==0) draw_smoke = 1; break;
+        if (draw_glyphs_flag==0) draw_matter = 1; break;
     //case 'm': scalar_colormap++; if (scalar_colormap>COLOR_BANDS) scalar_colormap=COLOR_BLACKWHITE; break;
     case 'a': frozen = 1-frozen; break;
     case 'q': exit(0);
@@ -235,6 +216,9 @@ void control_cb(int control)
         case APPLY_ISOLINES:
             isoline_manager.reset();
             break;
+        case ENABLE_HEIGHT:
+            reshape(winWidth, winHeight);
+            break;
         }
 
         update_variables_config_window();
@@ -274,7 +258,7 @@ void init_control_window()
     GLUI_StaticText *spacer_matter = glui->add_statictext_to_panel(matter_rollout, "");
     spacer_matter->set_w(260);
     spacer_matter->set_h(0);
-    glui->add_checkbox_to_panel(matter_rollout, "Enable Matter", &draw_smoke, 0, control_cb);
+    glui->add_checkbox_to_panel(matter_rollout, "Enable Matter", &draw_matter, 0, control_cb);
 
     GLUI_Panel *dataset_panel = new GLUI_Panel (matter_rollout, "Dataset Selection");
     GLUI_Listbox *matter_dataset_lb = glui->add_listbox_to_panel(dataset_panel, "", &dataset_id);
@@ -353,16 +337,33 @@ void init_control_window()
     scalar_dataset_lb->add_item(COLOR_FIRE, "Fire");
     scalar_dataset_lb->add_item(COLOR_CUSTOM, "Custom");
     new GLUI_Button(iso_rollout, "Apply paramenters", APPLY_ISOLINES, control_cb);
-
-
     iso_rollout->close();
+
+    // Height Plot Rollout
+    GLUI_Rollout *height_rollout = glui->add_rollout ("Height Plot", true);
+    GLUI_StaticText *spacer_height = glui->add_statictext_to_panel(height_rollout, "");
+    spacer_height->set_w(260); spacer_height->set_h(0);
+    glui->add_checkbox_to_panel(height_rollout, "Enable Height Plot", &draw_height_flag, ENABLE_HEIGHT, control_cb);
+
+
+    glui->add_edittext_to_panel(height_rollout, "Eye x:", GLUI_EDITTEXT_FLOAT, &eye_x);
+    glui->add_edittext_to_panel(height_rollout, "Eye y:", GLUI_EDITTEXT_FLOAT, &eye_y);
+    glui->add_edittext_to_panel(height_rollout, "Eye z:", GLUI_EDITTEXT_FLOAT, &eye_z);
+
+    glui->add_edittext_to_panel(height_rollout, "C x:", GLUI_EDITTEXT_FLOAT, &c_x);
+    glui->add_edittext_to_panel(height_rollout, "C y:", GLUI_EDITTEXT_FLOAT, &c_y);
+    glui->add_edittext_to_panel(height_rollout, "C z:", GLUI_EDITTEXT_FLOAT, &c_z);
+
+    glui->add_edittext_to_panel(height_rollout, "Scale dataset:", GLUI_EDITTEXT_FLOAT, &dataset_scale);
+
+
+    height_rollout->close();
+
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
 
-    update_variables_config_window();
-
+    update_variables_config_window(); // update values of statictexts
     GLUI_Master.auto_set_viewport();
-
     glui->set_main_gfx_window(main_window);
 }
