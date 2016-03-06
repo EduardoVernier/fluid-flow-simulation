@@ -51,7 +51,7 @@ IsolineManager isoline_manager = IsolineManager();
 
 // Height Plot variables
 int draw_height_flag = 0;
-float dataset_scale = 1;
+float dataset_scale = 30;
 
 
 void init_colormaps()
@@ -175,11 +175,16 @@ void draw_isolines(double *dataset)
     }
 }
 
-// testetete
-float f(float x, float y)								//A simple two-variable function to plot
-{														//The function is samples
-	float ret = 8*expf(-(x*x+y*y)/5);
-	return ret;
+void compute_normal(int idx, float *norm)
+{
+    float v_lenght = sqrtf(pow(der_sfx[idx]*dataset_scale,2)
+                        + pow(der_sfy[idx]*dataset_scale,2) + 1);
+    if (v_lenght < 1.0e-6)
+        v_lenght = 1;
+
+    norm[0] = (der_sfx[idx]*dataset_scale)/v_lenght;
+    norm[1] = (der_sfy[idx]*dataset_scale)/v_lenght;
+    norm[0] = 1.0/v_lenght;
 }
 
 //visualize: This is the main visualization function
@@ -237,16 +242,25 @@ void visualize(void)
 
     if (draw_height_flag)
     {
-
+        // Set "camera"
         glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity ();
+        glLoadIdentity();
         gluLookAt(eye_x,eye_y,eye_z,c_x,c_y,c_z,up_x,up_y,up_z);
-        glMatrixMode (GL_PROJECTION);
-        glLoadIdentity ();
-        gluPerspective(fov,float(winWidth)/winHeight,z_near,z_far);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(fov, float(winWidth)/winHeight, z_near, z_far);
 
-        glClearColor(1,1,1,1);								//1. Clear the frame and depth buffers
+        glClearColor(1,1,1,1); // Clear the frame and depth buffers
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glShadeModel(GL_SMOOTH);
+        float light[4] = {1,1,1,0}; // Enable and set one directional light
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glLightfv(GL_LIGHT0,GL_POSITION,light);
+        glEnable(GL_COLOR_MATERIAL); // Tell OpenGL to use the values passed by glColor() as material properties
+
+        float norm [3];
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         for (int j = 0; j < DIM - 1; j++)
@@ -259,6 +273,8 @@ void visualize(void)
             py = hn + (fftw_real)j * hn;
             int idx = (j * DIM) + i;
             set_color(dataset[idx], scalar_colormap);
+            compute_normal(idx, norm);
+            glNormal3f(norm[0], norm[1], norm[2]);
             glVertex3f(px, py, dataset[idx]*dataset_scale);
 
             for (i = 0; i < DIM - 1; i++)
@@ -267,17 +283,23 @@ void visualize(void)
                 py = hn + (fftw_real)(j + 1) * hn;
                 idx = ((j + 1) * DIM) + i;
                 set_color(dataset[idx], scalar_colormap);
+                compute_normal(idx, norm);
+                glNormal3f(norm[0], norm[1], norm[2]);
                 glVertex3f(px, py, dataset[idx]*dataset_scale);
                 px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
                 idx = (j * DIM) + (i + 1);
                 set_color(dataset[idx], scalar_colormap);
+                compute_normal(idx, norm);
+                glNormal3f(norm[0], norm[1], norm[2]);
                 glVertex3f(px, py, dataset[idx]*dataset_scale);
             }
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
             set_color(dataset[idx], scalar_colormap);
+            compute_normal(idx, norm);
+            glNormal3f(norm[0], norm[1], norm[2]);
             glVertex3f(px, py, dataset[idx]*dataset_scale);
             glEnd();
         }

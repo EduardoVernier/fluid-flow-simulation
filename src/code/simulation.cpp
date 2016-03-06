@@ -12,6 +12,7 @@ rfftwnd_plan plan_rc, plan_cr;  //simulation domain discretization
 
 fftw_real *der_vfx, *der_vfy;     //(vx,vy)   = derivate of the currently selected vector field
 fftw_real *div_vf;              //divergency of the currently selected vector field
+fftw_real *der_sfx, *der_sfy;     //(vx,vy)   = derivate of the currently selected SCALAR field
 
 extern int main_window;
 extern int frozen;
@@ -30,6 +31,8 @@ void init_simulation(int n)
     vy      = (fftw_real*) malloc(dim);
     der_vfx = (fftw_real*) malloc(dim);
     der_vfy = (fftw_real*) malloc(dim);
+	der_sfx = (fftw_real*) malloc(dim);
+	der_sfy = (fftw_real*) malloc(dim);
     div_vf  = (fftw_real*) malloc(dim);
     v_mag   = (fftw_real*) malloc(dim);
     vx0     = (fftw_real*) malloc(dim);
@@ -45,7 +48,7 @@ void init_simulation(int n)
 
     for (i = 0; i < n * n; i++) //Initialize data structures to 0
     {
-        vx[i] = vy[i] = der_vfx[i] = der_vfy[i] = div_vf[i] = 0.0f;
+        vx[i] = vy[i] = der_vfx[i] = der_vfy[i] = der_sfx[i] = der_sfy[i] = div_vf[i] = 0.0f;
         v_mag[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = f_mag[i] = rho[i] = rho0[i] = 0.0f;
     }
 }
@@ -139,9 +142,41 @@ void solve(int n, fftw_real* vx, fftw_real* vy, fftw_real* vx0, fftw_real* vy0, 
 	}
 }
 
+void compute_derivatives()
+{
+	fftw_real *current_sf;
+
+	if (dataset_id == SCALAR_RHO)
+		current_sf = rho;
+	else if (dataset_id == SCALAR_VELOC_MAG)
+		current_sf = v_mag;
+	else if (dataset_id == SCALAR_FORCE_MAG)
+		current_sf = f_mag;
+
+	for (int i = 0; i < DIM; ++i)
+	{
+		for (int j = 0; j < DIM; ++j)
+		{
+			// calculate y axis derivative
+			if (j == DIM-1) // make algorithm circular
+				der_sfy[i*DIM + j] = current_sf[i*DIM] - current_sf[i*DIM + j];
+			else
+				der_sfy[i*DIM + j] = current_sf[i*DIM + j + 1] - current_sf[i*DIM + j];
+
+			// calculate x axis derivative
+			if (i == DIM - 1)
+				der_sfx[i*DIM + j] = current_sf[j] - current_sf[i*DIM + j];
+			else
+				der_sfx[i*DIM + j] = current_sf[(i+1)*DIM + j] - current_sf[i*DIM + j];
+		}
+	}
+
+}
+
+
 // compute derivative_and_divergency: Uses simple subtraction from next neighbour.
 // Should I use some sort of kernel? Sobel, Prewitt, Laplace?
-void compute_derivatives_and_divergency()
+void compute_divergence()
 {
     // current vector field can be the velocity or force fields
 	fftw_real *current_vfx;
@@ -161,7 +196,6 @@ void compute_derivatives_and_divergency()
 		return;
 	}
 
-
     for (int i = 0; i < DIM; ++i)
     {
         for (int j = 0; j < DIM; ++j)
@@ -172,7 +206,7 @@ void compute_derivatives_and_divergency()
             else
                 der_vfy[i*DIM + j] = current_vfy[i*DIM + j + 1] - current_vfy[i*DIM + j];
 
-            // calculate y axis derivative
+            // calculate x axis derivative
             if (i == DIM - 1)
                 der_vfx[i*DIM + j] = current_vfx[j] - current_vfx[i*DIM + j];
             else
@@ -232,7 +266,8 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
     dataset_max = max_ds;
     dataset_min = min_ds;
     //printf ("%f  %f\n", min_ds, max_ds);
-    compute_derivatives_and_divergency();
+	compute_derivatives();
+    compute_divergence();
 }
 
 //set_forces: copy user-controlled forces to the force vectors that are sent to the solver.
