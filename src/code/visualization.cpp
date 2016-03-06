@@ -35,8 +35,8 @@ float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 i
 
 // Matter visualization variables
 int draw_matter = 1; // draw the smoke (matter) or not
-int scalar_colormap = COLOR_BLACKWHITE; // method for scalar coloring
-int dataset_id = SCALAR_RHO;
+int scalar_colormap = COLOR_RAINBOW; // method for scalar coloring
+int matter_dataset = SCALAR_RHO;
 
 // Glyphs visualization variables
 int draw_glyphs_flag = 0; //draw the vector field or not
@@ -51,6 +51,7 @@ IsolineManager isoline_manager = IsolineManager();
 
 // Height Plot variables
 int draw_height_flag = 0;
+int height_dataset_coloring = SCALAR_RHO;
 float dataset_scale = 30;
 
 
@@ -194,14 +195,25 @@ void visualize(void)
     fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
     fftw_real *dataset;
-    if (dataset_id == SCALAR_RHO)
+    if (matter_dataset == SCALAR_RHO)
         dataset = rho;
-    else if (dataset_id == SCALAR_VELOC_MAG)
+    else if (matter_dataset == SCALAR_VELOC_MAG)
         dataset = v_mag;
-    else if (dataset_id == SCALAR_FORCE_MAG)
+    else if (matter_dataset == SCALAR_FORCE_MAG)
         dataset = f_mag;
-    else if (dataset_id == SCALAR_FORCE_DIV || dataset_id == SCALAR_VELOC_DIV)
+    else if (matter_dataset == SCALAR_FORCE_DIV || matter_dataset == SCALAR_VELOC_DIV)
         dataset = div_vf;
+
+    // using other scalar field for colormapping
+    fftw_real *color_dataset;
+    if (height_dataset_coloring == SCALAR_RHO)
+        color_dataset = rho;
+    else if (height_dataset_coloring == SCALAR_VELOC_MAG)
+        color_dataset = v_mag;
+    else if (height_dataset_coloring == SCALAR_FORCE_MAG)
+        color_dataset = f_mag;
+    else if (height_dataset_coloring == SCALAR_FORCE_DIV || height_dataset_coloring == SCALAR_VELOC_DIV)
+        color_dataset = div_vf;
 
     if (draw_matter)
     {
@@ -254,53 +266,74 @@ void visualize(void)
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glShadeModel(GL_SMOOTH);
-        float light[4] = {1,1,1,0}; // Enable and set one directional light
+/*        float light[4] = {1,1,1,0}; // Enable and set one directional light
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
         glLightfv(GL_LIGHT0,GL_POSITION,light);
+*/
         glEnable(GL_COLOR_MATERIAL); // Tell OpenGL to use the values passed by glColor() as material properties
 
+        GLfloat light0_ambient[] =  {0.1f, 0.1f, 0.3f, 1.0f};
+        GLfloat light0_diffuse[] =  {.6f, .6f, 1.0f, 1.0f};
+        GLfloat light0_position[] = {500.0f, 500.0f, 10.0f, 0.0f};
+
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
+        glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
+
+
         float norm [3];
+
+        float clamp_max = 500;
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         for (int j = 0; j < DIM - 1; j++)
         {
-            double px,py;
+            double px,py,pz;
             glBegin(GL_TRIANGLE_STRIP);
 
             int i = 0;
             px = wn + (fftw_real)i * wn;
             py = hn + (fftw_real)j * hn;
             int idx = (j * DIM) + i;
-            set_color(dataset[idx], scalar_colormap);
+            set_color(color_dataset[idx], scalar_colormap);
             compute_normal(idx, norm);
             glNormal3f(norm[0], norm[1], norm[2]);
-            glVertex3f(px, py, dataset[idx]*dataset_scale);
+            pz = dataset[idx]*dataset_scale;
+            if (pz > clamp_max) pz = clamp_max;
+            glVertex3f(px, py, pz);
 
             for (i = 0; i < DIM - 1; i++)
             {
                 px = wn + (fftw_real)i * wn;
                 py = hn + (fftw_real)(j + 1) * hn;
                 idx = ((j + 1) * DIM) + i;
-                set_color(dataset[idx], scalar_colormap);
+                set_color(color_dataset[idx], scalar_colormap);
                 compute_normal(idx, norm);
                 glNormal3f(norm[0], norm[1], norm[2]);
-                glVertex3f(px, py, dataset[idx]*dataset_scale);
+                pz = dataset[idx]*dataset_scale;
+                if (pz > clamp_max) pz = clamp_max;
+                glVertex3f(px, py, pz);
                 px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
                 idx = (j * DIM) + (i + 1);
-                set_color(dataset[idx], scalar_colormap);
+                set_color(color_dataset[idx], scalar_colormap);
                 compute_normal(idx, norm);
                 glNormal3f(norm[0], norm[1], norm[2]);
-                glVertex3f(px, py, dataset[idx]*dataset_scale);
-            }
+                pz = dataset[idx]*dataset_scale;
+                if (pz > clamp_max) pz = clamp_max;
+                glVertex3f(px, py, pz);            }
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
-            set_color(dataset[idx], scalar_colormap);
+            set_color(color_dataset[idx], scalar_colormap);
             compute_normal(idx, norm);
             glNormal3f(norm[0], norm[1], norm[2]);
-            glVertex3f(px, py, dataset[idx]*dataset_scale);
+            pz = dataset[idx]*dataset_scale;
+            if (pz > clamp_max) pz = clamp_max;
+            glVertex3f(px, py, pz);
             glEnd();
         }
          glutSwapBuffers();

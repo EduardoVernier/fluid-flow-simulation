@@ -18,17 +18,29 @@ SY_INCREASE_ID,
 SY_DECREASE_ID,
 ENABLE_GLYPHS,
 APPLY_ISOLINES,
-ENABLE_HEIGHT
+ENABLE_HEIGHT,
+EYE_X_INCREASE_ID,
+EYE_X_DECREASE_ID,
+EYE_Y_INCREASE_ID,
+EYE_Y_DECREASE_ID,
+EYE_Z_INCREASE_ID,
+EYE_Z_DECREASE_ID,
+SCALE_INCREASE_ID,
+SCALE_DECREASE_ID
 };
 
 // statictext objects pointers are global because control_cb callback
 // function can't handle arguments except int values
 GLUI_StaticText *dt_text, *hh_text, *visc_text;
 GLUI_StaticText *x_sample_text, *y_sample_text;
+GLUI_EditText *scale_edittext;
+GLUI_EditText *eye_x_edittext, *eye_y_edittext, *eye_z_edittext;
+
 
 // parameters window and custom colormap window global pointers
 GLUI *glui;
 GLUI *cust_window;
+
 
 
 //keyboard: Handle key presses
@@ -97,6 +109,13 @@ void update_variables_config_window()
     x_sample_text->set_text(buffer);
     sprintf(buffer, "Y axis = %d", glyphs.y_axis_samples);
     y_sample_text->set_text(buffer);
+
+    scale_edittext->set_float_val(dataset_scale);
+    eye_x_edittext->set_float_val(eye_x);
+    eye_y_edittext->set_float_val(eye_y);
+    eye_z_edittext->set_float_val(eye_z);
+
+
 }
 
 // resume: Unfortunate solution to rendering glui windows
@@ -219,6 +238,30 @@ void control_cb(int control)
         case ENABLE_HEIGHT:
             reshape(winWidth, winHeight);
             break;
+        case EYE_X_INCREASE_ID:
+            eye_x += 10;
+            break;
+        case EYE_X_DECREASE_ID:
+            eye_x -= 10;
+            break;
+        case EYE_Y_INCREASE_ID:
+            eye_y += 10;
+            break;
+        case EYE_Y_DECREASE_ID:
+            eye_y -= 10;
+            break;
+        case EYE_Z_INCREASE_ID:
+            eye_z += 10;
+            break;
+        case EYE_Z_DECREASE_ID:
+            eye_z -= 10;
+            break;
+        case SCALE_INCREASE_ID:
+            dataset_scale += 10;
+            break;
+        case SCALE_DECREASE_ID:
+            dataset_scale -= 10;
+            break;
         }
 
         update_variables_config_window();
@@ -261,7 +304,7 @@ void init_control_window()
     glui->add_checkbox_to_panel(matter_rollout, "Enable Matter", &draw_matter, 0, control_cb);
 
     GLUI_Panel *dataset_panel = new GLUI_Panel (matter_rollout, "Dataset Selection");
-    GLUI_Listbox *matter_dataset_lb = glui->add_listbox_to_panel(dataset_panel, "", &dataset_id);
+    GLUI_Listbox *matter_dataset_lb = glui->add_listbox_to_panel(dataset_panel, "", &matter_dataset);
     matter_dataset_lb->add_item(SCALAR_RHO, "Fluid Density");
     matter_dataset_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
     matter_dataset_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
@@ -345,16 +388,61 @@ void init_control_window()
     spacer_height->set_w(260); spacer_height->set_h(0);
     glui->add_checkbox_to_panel(height_rollout, "Enable Height Plot", &draw_height_flag, ENABLE_HEIGHT, control_cb);
 
+    GLUI_Listbox *scalar_dataset_height_lb = glui->add_listbox_to_panel(height_rollout, "Height value:", &matter_dataset);
+    scalar_dataset_height_lb->add_item(SCALAR_RHO, "Fluid Density");
+    scalar_dataset_height_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
+    scalar_dataset_height_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
 
-    glui->add_edittext_to_panel(height_rollout, "Eye x:", GLUI_EDITTEXT_FLOAT, &eye_x);
-    glui->add_edittext_to_panel(height_rollout, "Eye y:", GLUI_EDITTEXT_FLOAT, &eye_y);
-    glui->add_edittext_to_panel(height_rollout, "Eye z:", GLUI_EDITTEXT_FLOAT, &eye_z);
+    GLUI_Listbox *height_colormap_dataset_lb = glui->add_listbox_to_panel(height_rollout, "Coloring dataset: ", &height_dataset_coloring);
+    height_colormap_dataset_lb->add_item(SCALAR_RHO, "Fluid Density");
+    height_colormap_dataset_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
+    height_colormap_dataset_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
+    height_colormap_dataset_lb->add_item(SCALAR_VELOC_DIV, "Velocity Field Divergency");
+    height_colormap_dataset_lb->add_item(SCALAR_FORCE_DIV, "Force Field Divergency");
+
+
+    GLUI_Panel *eye_x_panel = new GLUI_Panel (height_rollout, "");
+    eye_x_edittext = glui->add_edittext_to_panel(eye_x_panel, "Eye x:", GLUI_EDITTEXT_FLOAT, &eye_x);
+    glui->add_column_to_panel(eye_x_panel, false);
+    GLUI_Button *increase_eye_x = new GLUI_Button(eye_x_panel, "+", EYE_X_INCREASE_ID, control_cb);
+    increase_eye_x->set_w(10);
+    glui->add_column_to_panel(eye_x_panel, false);
+    GLUI_Button *decrease_eye_x = new GLUI_Button(eye_x_panel, "-", EYE_X_DECREASE_ID, control_cb);
+    decrease_eye_x->set_w(10);
+
+    GLUI_Panel *eye_y_panel = new GLUI_Panel (height_rollout, "");
+    eye_y_edittext = glui->add_edittext_to_panel(eye_y_panel, "Eye y:", GLUI_EDITTEXT_FLOAT, &eye_y);
+    glui->add_column_to_panel(eye_y_panel, false);
+    GLUI_Button *increase_eye_y = new GLUI_Button(eye_y_panel, "+", EYE_Y_INCREASE_ID, control_cb);
+    increase_eye_y->set_w(10);
+    glui->add_column_to_panel(eye_y_panel, false);
+    GLUI_Button *decrease_eye_y = new GLUI_Button(eye_y_panel, "-", EYE_Y_DECREASE_ID, control_cb);
+    decrease_eye_y->set_w(10);
+
+    GLUI_Panel *eye_z_panel = new GLUI_Panel (height_rollout, "");
+    eye_z_edittext = glui->add_edittext_to_panel(eye_z_panel, "Eye z:", GLUI_EDITTEXT_FLOAT, &eye_z);
+    glui->add_column_to_panel(eye_z_panel, false);
+    GLUI_Button *increase_eye_z = new GLUI_Button(eye_z_panel, "+", EYE_Z_INCREASE_ID, control_cb);
+    increase_eye_z->set_w(10);
+    glui->add_column_to_panel(eye_z_panel, false);
+    GLUI_Button *decrease_eye_z = new GLUI_Button(eye_z_panel, "-", EYE_Z_DECREASE_ID, control_cb);
+    decrease_eye_z->set_w(10);
+
 
     glui->add_edittext_to_panel(height_rollout, "C x:", GLUI_EDITTEXT_FLOAT, &c_x);
     glui->add_edittext_to_panel(height_rollout, "C y:", GLUI_EDITTEXT_FLOAT, &c_y);
     glui->add_edittext_to_panel(height_rollout, "C z:", GLUI_EDITTEXT_FLOAT, &c_z);
 
-    glui->add_edittext_to_panel(height_rollout, "Scale dataset:", GLUI_EDITTEXT_FLOAT, &dataset_scale);
+
+
+    GLUI_Panel *scale_panel = new GLUI_Panel (height_rollout, "");
+    scale_edittext = glui->add_edittext_to_panel(scale_panel, "Scale dataset:", GLUI_EDITTEXT_FLOAT, &dataset_scale);
+    glui->add_column_to_panel(scale_panel, false);
+    GLUI_Button *increase_scale = new GLUI_Button(scale_panel, "+", SCALE_INCREASE_ID, control_cb);
+    increase_scale->set_w(10);
+    glui->add_column_to_panel(scale_panel, false);
+    GLUI_Button *decrease_scale = new GLUI_Button(scale_panel, "-", SCALE_DECREASE_ID, control_cb);
+    decrease_scale->set_w(10);
 
 
     height_rollout->close();

@@ -17,7 +17,7 @@ fftw_real *der_sfx, *der_sfy;     //(vx,vy)   = derivate of the currently select
 extern int main_window;
 extern int frozen;
 extern float dataset_max, dataset_min;
-extern int dataset_id;
+extern int matter_dataset;
 
 //init_simulation: Initialize simulation data structures as a function of the grid size 'n'.
 //                 Although the simulation takes place on a 2D grid, we allocate all data structures as 1D arrays,
@@ -146,11 +146,11 @@ void compute_derivatives()
 {
 	fftw_real *current_sf;
 
-	if (dataset_id == SCALAR_RHO)
+	if (matter_dataset == SCALAR_RHO)
 		current_sf = rho;
-	else if (dataset_id == SCALAR_VELOC_MAG)
+	else if (matter_dataset == SCALAR_VELOC_MAG)
 		current_sf = v_mag;
-	else if (dataset_id == SCALAR_FORCE_MAG)
+	else if (matter_dataset == SCALAR_FORCE_MAG)
 		current_sf = f_mag;
 
 	for (int i = 0; i < DIM; ++i)
@@ -181,12 +181,12 @@ void compute_divergence()
     // current vector field can be the velocity or force fields
 	fftw_real *current_vfx;
 	fftw_real *current_vfy;
-	if (dataset_id == SCALAR_VELOC_DIV)
+	if (matter_dataset == SCALAR_VELOC_DIV)
 	{
 		current_vfx = vx;
 		current_vfy = vy;
 	}
-	else if (dataset_id == SCALAR_FORCE_DIV)
+	else if (matter_dataset == SCALAR_FORCE_DIV)
 	{
 		current_vfx = fx;
 		current_vfy = fy;
@@ -227,13 +227,13 @@ void diffuse_matter(int n, fftw_real *vx, fftw_real *vy, fftw_real *rho, fftw_re
 
 	// Used to calculate scaling values
     fftw_real *dataset;
-    if (dataset_id == SCALAR_RHO)
+    if (matter_dataset == SCALAR_RHO)
         dataset = rho;
-    else if (dataset_id == SCALAR_VELOC_MAG)
+    else if (matter_dataset == SCALAR_VELOC_MAG)
         dataset = v_mag;
-    else if (dataset_id == SCALAR_FORCE_MAG)
+    else if (matter_dataset == SCALAR_FORCE_MAG)
         dataset = f_mag;
-	else if (dataset_id == SCALAR_FORCE_DIV || dataset_id == SCALAR_VELOC_DIV)
+	else if (matter_dataset == SCALAR_FORCE_DIV || matter_dataset == SCALAR_VELOC_DIV)
         dataset = div_vf;
 
     float min_ds = 10000, max_ds = -10000;
