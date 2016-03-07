@@ -255,6 +255,7 @@ void visualize(void)
     if (draw_height_flag)
     {
         // Set "camera"
+        glEnable(GL_DEPTH_TEST);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         gluLookAt(eye_x,eye_y,eye_z,c_x,c_y,c_z,up_x,up_y,up_z);
@@ -286,7 +287,7 @@ void visualize(void)
 
         float norm [3];
 
-        float clamp_max = 500;
+        float clamp_max = 150;
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         for (int j = 0; j < DIM - 1; j++)
