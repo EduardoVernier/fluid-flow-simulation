@@ -315,6 +315,7 @@ void init_control_window()
     GLUI_Listbox *scalar_colormap_lb = glui->add_listbox_to_panel(color_panel, "Colormap: ", &scalar_colormap);
     scalar_colormap_lb->add_item(COLOR_BLACKWHITE, "Greyscale");
     scalar_colormap_lb->add_item(COLOR_RAINBOW, "Rainbow");
+    scalar_colormap_lb->add_item(COLOR_RAINBOW_1D, "Rainbow (1D Texture)");
     scalar_colormap_lb->add_item(COLOR_FIRE, "Fire");
     scalar_colormap_lb->add_item(COLOR_CUSTOM, "Custom");
     new GLUI_Button(color_panel, "Edit custom colormap", COLOR_CUSTOM, control_cb);

@@ -6,6 +6,7 @@ enum GLOBAL_IDS
 // different types of color mapping: black-and-white, rainbow, fire or custom
 COLOR_BLACKWHITE = 100,
 COLOR_RAINBOW,
+COLOR_RAINBOW_1D,
 COLOR_FIRE,
 COLOR_CUSTOM,
 // scalar field selector id on listbox

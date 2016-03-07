@@ -32,6 +32,7 @@ ColorMap rainbow = ColorMap((char*)"Rainbow");
 ColorMap custom = ColorMap((char*)"Custom");
 int custom_color_index = 0;
 float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 interpolations on a custom colormap
+unsigned int textureID[1];
 
 // Matter visualization variables
 int draw_matter = 1; // draw the smoke (matter) or not
@@ -54,6 +55,31 @@ int draw_height_flag = 0;
 int height_dataset_coloring = SCALAR_RHO;
 float dataset_scale = 30;
 
+void create_1D_texture() //Create one 1D texture for the rainbow colormap
+{
+	glGenTextures(1,textureID);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glBindTexture(GL_TEXTURE_1D,textureID[0]);
+	const int size = 256;
+	float textureImage[3*size];
+	for(int j=0;j<size;++j)
+	{
+		float v = float(j)/(size-1);
+		Color c = rainbow.get_color(v);
+		textureImage[3*j]   = c.r;
+		textureImage[3*j+1] = c.g;
+		textureImage[3*j+2] = c.b;
+	}
+	glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,size,0,GL_RGB,GL_FLOAT,textureImage);
+    //glEnable(GL_TEXTURE_1D);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glBindTexture(GL_TEXTURE_1D,textureID[0]);
+}
+
 
 void init_colormaps()
 {
@@ -61,6 +87,8 @@ void init_colormaps()
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
     fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
     fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
+
+    create_1D_texture();
 }
 
 //set_color: Sets three different types of colormaps
@@ -91,6 +119,13 @@ void set_color(double vy, int colormap)
 
     switch(colormap)
     {
+    glBindTexture(GL_TEXTURE_1D, 0);
+    glDisable(GL_TEXTURE_1D);
+    case COLOR_RAINBOW_1D:
+        glBindTexture(GL_TEXTURE_1D,textureID[0]);
+        glEnable(GL_TEXTURE_1D);
+        glTexCoord1f(vy);
+        break;
     case COLOR_BLACKWHITE:
         c = Color(vy,vy,vy);
         break;
@@ -228,7 +263,7 @@ void visualize(void)
             py = hn + (fftw_real)j * hn;
             int idx = (j * DIM) + i;
             set_color(dataset[idx], scalar_colormap);
-            glVertex2f(px,py);
+            glVertex3f(px,py,0);
 
             for (i = 0; i < DIM - 1; i++)
             {
@@ -236,18 +271,18 @@ void visualize(void)
                 py = hn + (fftw_real)(j + 1) * hn;
                 idx = ((j + 1) * DIM) + i;
                 set_color(dataset[idx], scalar_colormap);
-                glVertex2f(px, py);
+                glVertex3f(px,py,0);
                 px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
                 idx = (j * DIM) + (i + 1);
                 set_color(dataset[idx], scalar_colormap);
-                glVertex2f(px, py);
+                glVertex3f(px,py,0);
             }
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
             set_color(dataset[idx], scalar_colormap);
-            glVertex2f(px, py);
+            glVertex3f(px,py,0);
             glEnd();
         }
     }
@@ -325,7 +360,8 @@ void visualize(void)
                 glNormal3f(norm[0], norm[1], norm[2]);
                 pz = dataset[idx]*dataset_scale;
                 if (pz > clamp_max) pz = clamp_max;
-                glVertex3f(px, py, pz);            }
+                glVertex3f(px, py, pz);
+            }
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
