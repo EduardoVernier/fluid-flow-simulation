@@ -218,8 +218,6 @@ void control_cb(int control)
         case COLOR_FIRE:
             scalar_colormap = control;
             break;
-        case QUANT_ID:
-            break;
         case SX_INCREASE_ID:
             glyphs.x_axis_samples++;
             break;
@@ -261,6 +259,9 @@ void control_cb(int control)
             break;
         case SCALE_DECREASE_ID:
             dataset_scale -= 10;
+            break;
+        case QUANT_ID:
+            create_1D_texture();
             break;
         }
 
@@ -319,7 +320,7 @@ void init_control_window()
     scalar_colormap_lb->add_item(COLOR_FIRE, "Fire");
     scalar_colormap_lb->add_item(COLOR_CUSTOM, "Custom");
     new GLUI_Button(color_panel, "Edit custom colormap", COLOR_CUSTOM, control_cb);
-    glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap);
+    glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap, QUANT_ID, control_cb);
 
     GLUI_Panel *clamp_ro = glui->add_panel_to_panel(matter_rollout, "Options", true);
     glui->add_checkbox_to_panel(clamp_ro, "Clampling", &clamp_flag, 0, control_cb);

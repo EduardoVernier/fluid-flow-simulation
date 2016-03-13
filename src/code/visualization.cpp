@@ -65,6 +65,12 @@ void create_1D_texture() //Create one 1D texture for the rainbow colormap
 	for(int j=0;j<size;++j)
 	{
 		float v = float(j)/(size-1);
+		if (quantize_colormap != 0)
+		{
+			v *= quantize_colormap;
+			v = (int)(v);
+			v/= quantize_colormap;
+		}
 		Color c = rainbow.get_color(v);
 		textureImage[3*j]   = c.r;
 		textureImage[3*j+1] = c.g;
@@ -74,8 +80,8 @@ void create_1D_texture() //Create one 1D texture for the rainbow colormap
     //glEnable(GL_TEXTURE_1D);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
     glBindTexture(GL_TEXTURE_1D,textureID[0]);
 }
@@ -111,10 +117,11 @@ void set_color(double vy, int colormap)
     glShadeModel(GL_SMOOTH);
     if(quantize_colormap != 0)
     {
-        glShadeModel(GL_FLAT);
+        //glShadeModel(GL_FLAT);
         vy *= quantize_colormap;
         vy = (int)(vy);
         vy/= quantize_colormap;
+
     }
 
     switch(colormap)
@@ -163,7 +170,8 @@ void draw_colorbar()
 
         double current_value = colorbar_min + (i/n_samples)*(colorbar_max-colorbar_min);
         set_color(current_value, scalar_colormap);
-        glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
+
+		glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
                 0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
 
         if(i % ((int)n_samples/10) == 0)
@@ -191,6 +199,7 @@ void draw_isolines(double *dataset)
 {
     double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
     double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
+	glLineWidth(3.0);
 
     for(vector<Isoline>::iterator iso_it = isoline_manager.isoline_vector.begin(); iso_it != isoline_manager.isoline_vector.end(); ++iso_it)
     {
@@ -375,6 +384,10 @@ void visualize(void)
         }
          glutSwapBuffers();
     }
+	else
+	{
+		draw_colorbar();
+	}
 
     if (draw_glyphs_flag)
         glyphs.draw_glyphs();
@@ -387,7 +400,6 @@ void visualize(void)
         draw_isolines(dataset);
     }
 
-    draw_colorbar();
 }
 
 
