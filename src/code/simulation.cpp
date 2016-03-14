@@ -14,6 +14,10 @@ fftw_real *der_vfx, *der_vfy;     //(vx,vy)   = derivate of the currently select
 fftw_real *div_vf;              //divergency of the currently selected vector field
 fftw_real *der_sfx, *der_sfy;     //(vx,vy)   = derivate of the currently selected SCALAR field
 
+// Slice data structure variables
+Slices slices = Slices(10);
+
+
 extern int main_window;
 extern int frozen;
 extern float dataset_max, dataset_min;
@@ -301,6 +305,7 @@ void do_one_simulation_step(void)
 	  set_forces();
 	  solve(DIM, vx, vy, vx0, vy0, visc, dt);
 	  diffuse_matter(DIM, vx, vy, rho, rho0, dt);
+	  slices.add_slice(vx, vy);
 	  glutPostRedisplay();
 	}
 }

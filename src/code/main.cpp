@@ -16,6 +16,11 @@ using namespace std;
 #include <sys/time.h>
 
 #include "Globals.cpp"
+#include "Color.cpp"
+#include "ColorMap.h"
+#include "Glyphs.h"
+#include "IsolineManager.h"
+#include "Slices.h"
 
 #include "simulation.cpp"
 #include "visualization.cpp"

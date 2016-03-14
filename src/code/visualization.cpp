@@ -1,8 +1,3 @@
-#include "Color.cpp"
-#include "ColorMap.h"
-#include "Glyphs.h"
-#include "IsolineManager.h"
-
 // Viewing, camera and ilumination parameters
 int main_window;
 int winWidth, winHeight; // size of the graphics window, in pixels
@@ -311,11 +306,6 @@ void visualize(void)
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glShadeModel(GL_SMOOTH);
-/*        float light[4] = {1,1,1,0}; // Enable and set one directional light
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
-        glLightfv(GL_LIGHT0,GL_POSITION,light);
-*/
         glEnable(GL_COLOR_MATERIAL); // Tell OpenGL to use the values passed by glColor() as material properties
 
         GLfloat light0_ambient[] =  {0.1f, 0.1f, 0.3f, 1.0f};
