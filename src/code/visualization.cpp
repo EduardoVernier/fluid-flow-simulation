@@ -47,7 +47,7 @@ Glyphs glyphs = Glyphs();
 
 // Isolines variables
 int draw_isolines_flag = 0;
-int isoline_colormap = COLOR_RAINBOW;
+int isoline_colormap = COLOR_CUSTOM;
 IsolineManager isoline_manager = IsolineManager();
 
 // Height Plot variables
@@ -395,7 +395,7 @@ void visualize(void)
     if (draw_isolines_flag)
     {
         if(isoline_manager.isoline_vector.empty())
-            isoline_manager.create_isoline();
+            isoline_manager.reset();
         isoline_manager.compute_isolines();
         draw_isolines(dataset);
     }
