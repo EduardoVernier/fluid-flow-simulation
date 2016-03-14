@@ -26,7 +26,8 @@ EYE_Y_DECREASE_ID,
 EYE_Z_INCREASE_ID,
 EYE_Z_DECREASE_ID,
 SCALE_INCREASE_ID,
-SCALE_DECREASE_ID
+SCALE_DECREASE_ID,
+UPDATE_SCALAR_COLORMAP
 };
 
 // statictext objects pointers are global because control_cb callback
@@ -261,7 +262,8 @@ void control_cb(int control)
             dataset_scale -= 10;
             break;
         case QUANT_ID:
-            create_1D_texture();
+        case UPDATE_SCALAR_COLORMAP:
+            create_1D_textures(scalar_colormap);
             break;
         }
 
@@ -313,7 +315,7 @@ void init_control_window()
     matter_dataset_lb->add_item(SCALAR_FORCE_DIV, "Force Field Divergency");
 
     GLUI_Panel *color_panel = new GLUI_Panel (matter_rollout, "Color Mapping");
-    GLUI_Listbox *scalar_colormap_lb = glui->add_listbox_to_panel(color_panel, "Colormap: ", &scalar_colormap);
+    GLUI_Listbox *scalar_colormap_lb = glui->add_listbox_to_panel(color_panel, "Colormap: ", &scalar_colormap, UPDATE_SCALAR_COLORMAP, control_cb);
     scalar_colormap_lb->add_item(COLOR_RAINBOW, "Rainbow");
     scalar_colormap_lb->add_item(COLOR_BLACKWHITE, "Greyscale");
     scalar_colormap_lb->add_item(COLOR_FIRE, "Fire");

@@ -50,10 +50,11 @@ int draw_height_flag = 0;
 int height_dataset_coloring = SCALAR_RHO;
 float dataset_scale = 30;
 
-void create_1D_texture() //Create one 1D texture for the rainbow colormap
+void create_1D_textures(int colormap) //Create one 1D texture for the rainbow colormap
 {
 	glGenTextures(1,textureID);
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+
 	glBindTexture(GL_TEXTURE_1D,textureID[0]);
 	const int size = 256;
 	float textureImage[3*size];
@@ -66,13 +67,30 @@ void create_1D_texture() //Create one 1D texture for the rainbow colormap
 			v = (int)(v);
 			v/= quantize_colormap;
 		}
-		Color c = rainbow.get_color(v);
+		Color c;
+		switch(colormap)
+	    {
+	    case COLOR_BLACKWHITE:
+			c = Color(v,v,v);
+			break;
+	    case COLOR_RAINBOW:
+	        c = rainbow.get_color(v);
+	        break;
+	    case COLOR_FIRE:
+	        c = fire.get_color(v);
+	        break;
+	    case COLOR_CUSTOM:
+	        c = custom.get_color(v);
+	        break;
+	    }
 		textureImage[3*j]   = c.r;
 		textureImage[3*j+1] = c.g;
 		textureImage[3*j+2] = c.b;
 	}
 	glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,size,0,GL_RGB,GL_FLOAT,textureImage);
-    //glEnable(GL_TEXTURE_1D);
+
+
+    glEnable(GL_TEXTURE_1D);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -89,59 +107,26 @@ void init_colormaps()
     fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
     fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
 
-    create_1D_texture();
+    create_1D_textures(scalar_colormap);
 }
 
 //set_color: Sets three different types of colormaps
-void set_color(double vy, int colormap)
+void set_color(double v, int colormap)
 {
     Color c;
     double out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
 
     if (clamp_flag)
     {
-        if (vy > clamp_max) vy = clamp_max; if (vy < clamp_min) vy = clamp_min;
+        if (v > clamp_max) v = clamp_max; if (v < clamp_min) v = clamp_min;
         // map interval clamp_min - clamp_max -> out_min - out_max
-        vy = (vy - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
+        v = (v - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
     }
 
     if (scaling_flag)
-        vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
+        v = (v - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
 
-
-    glShadeModel(GL_SMOOTH);
-    if(quantize_colormap != 0)
-    {
-        //glShadeModel(GL_FLAT);
-        vy *= quantize_colormap;
-        vy = (int)(vy);
-        vy/= quantize_colormap;
-
-    }
-
-    switch(colormap)
-    {
-    glBindTexture(GL_TEXTURE_1D, 0);
-    glDisable(GL_TEXTURE_1D);
-    case COLOR_RAINBOW_1D:
-        glBindTexture(GL_TEXTURE_1D,textureID[0]);
-        glEnable(GL_TEXTURE_1D);
-        glTexCoord1f(vy);
-        break;
-    case COLOR_BLACKWHITE:
-        c = Color(vy,vy,vy);
-        break;
-    case COLOR_RAINBOW:
-        c = rainbow.get_color(vy);
-        break;
-    case COLOR_FIRE:
-        c = fire.get_color(vy);
-        break;
-    case COLOR_CUSTOM:
-        c = custom.get_color(vy);
-        break;
-    }
-    glColor3f(c.r,c.g,c.b);
+	glTexCoord1f(v);
 }
 
 
@@ -168,7 +153,7 @@ void draw_colorbar()
 
 		glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
                 0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
-
+/*
         if(i % ((int)n_samples/10) == 0)
         {
             glColor3f(1,1,1);
@@ -186,6 +171,7 @@ void draw_colorbar()
             glPopMatrix();
             glMatrixMode( GL_MODELVIEW );
         }
+		*/
     }
 }
 
