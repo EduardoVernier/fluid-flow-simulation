@@ -35,5 +35,10 @@ ui_*.h
 
 #QtCtreator CMake
 CMakeLists.txt.user
-
+FFS.creator.user
+Flow.config
+Flow.creator
+Flow.creator.user
+Flow.files
+Flow.includes
 *~
