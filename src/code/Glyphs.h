@@ -23,7 +23,6 @@ public:
     void draw_glyphs();
     void color_glyph(int i, int j);
     void direction_to_color(float x, float y);
-    void set_colormap(float vy);
     void bilinear_interpolation(double *vec, double *vf_x, double *vf_y, double i, double j);
 
     double *vf_x, *vf_y;

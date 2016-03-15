@@ -343,12 +343,12 @@ void init_control_window()
     vector_dataset_lb->add_item(VECTOR_VELOC, "Fluid Velocity Field");
     vector_dataset_lb->add_item(VECTOR_FORCE, "Force Field");
 
-    GLUI_Listbox *scalar_dataset_glyph_lb = glui->add_listbox_to_panel(glyph_rollout, "Colormap value:", &glyphs.scalar_field);
+    GLUI_Listbox *scalar_dataset_glyph_lb = glui->add_listbox_to_panel(glyph_rollout, "Color value:", &glyphs.scalar_field);
+    scalar_dataset_glyph_lb->add_item(SCALAR_WHITE, "White");
+    scalar_dataset_glyph_lb->add_item(SCALAR_DIR, "Vector Direction");
     scalar_dataset_glyph_lb->add_item(SCALAR_RHO, "Fluid Density");
     scalar_dataset_glyph_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
     scalar_dataset_glyph_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
-    scalar_dataset_glyph_lb->add_item(SCALAR_DIR, "Vector Direction");
-    scalar_dataset_glyph_lb->add_item(SCALAR_WHITE, "White");
 
     GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_rollout, "Glypth Type:", &glyphs.glyph_type);
     glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");

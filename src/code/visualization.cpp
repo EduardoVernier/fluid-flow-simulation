@@ -90,7 +90,6 @@ void create_1D_textures(int colormap) //Create one 1D texture for the rainbow co
 	glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,size,0,GL_RGB,GL_FLOAT,textureImage);
 
 
-    glEnable(GL_TEXTURE_1D);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -240,6 +239,8 @@ void visualize(void)
     else if (height_dataset_coloring == SCALAR_FORCE_DIV || height_dataset_coloring == SCALAR_VELOC_DIV)
         color_dataset = div_vf;
 
+	glEnable(GL_TEXTURE_1D);
+
     if (draw_matter)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -365,6 +366,8 @@ void visualize(void)
 		draw_colorbar();
 	}
 
+	glDisable(GL_TEXTURE_1D);
+
     if (draw_glyphs_flag)
         glyphs.draw_glyphs();
 
@@ -375,7 +378,6 @@ void visualize(void)
         isoline_manager.compute_isolines();
         draw_isolines(dataset);
     }
-
 }
 
 

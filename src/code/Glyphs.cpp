@@ -150,62 +150,16 @@ void Glyphs::color_glyph(int i, int j)
         direction_to_color(vf_x[idx],vf_y[idx]);
         break;
     case SCALAR_RHO:
-        set_colormap(rho[idx]);
+        glTexCoord1f(rho[idx]);
         break;
     case SCALAR_VELOC_MAG:
-        set_colormap(v_mag[idx]);
+        glTexCoord1f(v_mag[idx]);
         break;
     case SCALAR_FORCE_MAG:
-        set_colormap(f_mag[idx]);
+        glTexCoord1f(f_mag[idx]);
         break;
     }
 }
-
-// Duplicate from visualization.cpp << careful!
-//set_colormap: Sets three different types of colormaps
-void Glyphs::set_colormap(float vy)
-{
-    Color c;
-    float out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
-
-    if (clamp_flag)
-    {
-        if (vy > clamp_max) vy = clamp_max; if (vy < clamp_min) vy = clamp_min;
-        // map interval clamp_min - clamp_max -> out_min - out_max
-        vy = (vy - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
-    }
-
-    if (scaling_flag)
-        vy = (vy - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
-
-
-    glShadeModel(GL_SMOOTH);
-    if(quantize_colormap != 0)
-    {
-        glShadeModel(GL_FLAT);
-        vy *= quantize_colormap;
-        vy = (int)(vy);
-        vy/= quantize_colormap;
-    }
-
-    switch(scalar_colormap)
-    {
-    case COLOR_BLACKWHITE:
-        c = Color(vy,vy,vy);
-        break;
-    case COLOR_RAINBOW:
-        c = rainbow.get_color(vy);
-        break;
-    case COLOR_FIRE:
-        c = fire.get_color(vy);
-        break;
-    case COLOR_CUSTOM:
-        c = custom.get_color(vy);
-        break;
-    }
-    glColor3f(c.r,c.g,c.b);
-}
-
 
 void Glyphs::direction_to_color(float x, float y)
 {
