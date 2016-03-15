@@ -147,18 +147,23 @@ void draw_colorbar()
         colorbar_max *=1.1;
 
         double current_value = colorbar_min + (i/n_samples)*(colorbar_max-colorbar_min);
+		glEnable(GL_TEXTURE_1D);
+		glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
         set_color(current_value, scalar_colormap);
-
 		glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
                 0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
-/*
+
+		glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+		glDisable(GL_TEXTURE_1D);
+
+
         if(i % ((int)n_samples/10) == 0)
         {
-            glColor3f(1,1,1);
             std::string str = std::to_string(current_value);
             glMatrixMode( GL_MODELVIEW );
             glPushMatrix();
             glLoadIdentity();
+			//glColor3f(1,1,1);
             glRasterPos2i( 0.96*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
             for (unsigned j = 0; j < 5; ++j ) //only first 5 characters
             {
@@ -169,7 +174,6 @@ void draw_colorbar()
             glPopMatrix();
             glMatrixMode( GL_MODELVIEW );
         }
-		*/
     }
 }
 
@@ -238,11 +242,15 @@ void visualize(void)
     else if (height_dataset_coloring == SCALAR_FORCE_DIV || height_dataset_coloring == SCALAR_VELOC_DIV)
         color_dataset = div_vf;
 
-	glEnable(GL_TEXTURE_1D);
+	glClearColor(0,0,0,0); // Clear the frame and depth buffers
+
 
     if (draw_matter)
     {
+		glEnable(GL_TEXTURE_1D);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_LIGHT0);
         for (int j = 0; j < DIM - 1; j++)
         {
             double px,py;
@@ -275,11 +283,15 @@ void visualize(void)
             glVertex3f(px,py,0);
             glEnd();
         }
+		glDisable(GL_TEXTURE_1D);
+		draw_colorbar();
+
     }
 
     if (draw_height_flag)
     {
         // Set "camera"
+		glEnable(GL_TEXTURE_1D);
         glEnable(GL_DEPTH_TEST);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -288,7 +300,7 @@ void visualize(void)
         glLoadIdentity();
         gluPerspective(fov, float(winWidth)/winHeight, z_near, z_far);
 
-        glClearColor(1,1,1,1); // Clear the frame and depth buffers
+		glClearColor(0,0,0,0); // Clear the frame and depth buffers
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glShadeModel(GL_SMOOTH);
@@ -359,15 +371,15 @@ void visualize(void)
             glEnd();
         }
          glutSwapBuffers();
+		 glDisable(GL_TEXTURE_1D);
     }
-	else
-	{
-		draw_colorbar();
-	}
 
-	glDisable(GL_TEXTURE_1D);
 
-    if (draw_glyphs_flag)
+
+
+
+
+	if (draw_glyphs_flag)
         glyphs.draw_glyphs();
 
     if (draw_isolines_flag)
