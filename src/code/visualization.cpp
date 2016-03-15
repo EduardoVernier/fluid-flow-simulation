@@ -5,10 +5,10 @@ int winWidth, winHeight; // size of the graphics window, in pixels
 float fov = 80;
 float aspect = 1;
 float z_near = 0.1;
-float z_far = 1000;
+float z_far = 2000;
 // Modelview (camera extrinsic) parameters
-float eye_x = 400, eye_y = -150, eye_z = 200;
-float c_x   = 400, c_y   = 300,  c_z   = 0;
+float eye_x = 650, eye_y = -220, eye_z = 380;
+float c_x   = 650, c_y   = 300,  c_z   = 0;
 float up_x  = 0,  up_y  = 0,  up_z  = 1;
 
 // Simulation control variables
@@ -401,11 +401,10 @@ void display(void)
 //reshape: Handle window resizing (reshaping) events
 void reshape(int w, int h)
 {
-
     glViewport(0.0f, 0.0f, (GLfloat)w, (GLfloat)h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
     winWidth = w; winHeight = h;
-
+	c_x = eye_x = (winWidth*0.95)/2;
 }

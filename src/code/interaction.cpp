@@ -25,6 +25,12 @@ EYE_Y_INCREASE_ID,
 EYE_Y_DECREASE_ID,
 EYE_Z_INCREASE_ID,
 EYE_Z_DECREASE_ID,
+C_X_INCREASE_ID,
+C_X_DECREASE_ID,
+C_Y_INCREASE_ID,
+C_Y_DECREASE_ID,
+C_Z_INCREASE_ID,
+C_Z_DECREASE_ID,
 SCALE_INCREASE_ID,
 SCALE_DECREASE_ID,
 UPDATE_SCALAR_COLORMAP
@@ -36,6 +42,7 @@ GLUI_StaticText *dt_text, *hh_text, *visc_text;
 GLUI_StaticText *x_sample_text, *y_sample_text;
 GLUI_EditText *scale_edittext;
 GLUI_EditText *eye_x_edittext, *eye_y_edittext, *eye_z_edittext;
+GLUI_EditText *c_x_edittext, *c_y_edittext, *c_z_edittext;
 
 
 // parameters window and custom colormap window global pointers
@@ -253,6 +260,24 @@ void control_cb(int control)
         case EYE_Z_DECREASE_ID:
             eye_z -= 10;
             break;
+        case C_X_INCREASE_ID:
+            c_x += 10;
+            break;
+        case C_X_DECREASE_ID:
+            c_x -= 10;
+            break;
+        case C_Y_INCREASE_ID:
+            c_y += 10;
+            break;
+        case C_Y_DECREASE_ID:
+            c_y -= 10;
+            break;
+        case C_Z_INCREASE_ID:
+            c_z += 10;
+            break;
+        case C_Z_DECREASE_ID:
+            c_z -= 10;
+            break;
         case SCALE_INCREASE_ID:
             dataset_scale += 10;
             break;
@@ -430,9 +455,32 @@ void init_control_window()
     GLUI_Button *decrease_eye_z = new GLUI_Button(eye_z_panel, "-", EYE_Z_DECREASE_ID, control_cb);
     decrease_eye_z->set_w(10);
 
-    glui->add_edittext_to_panel(height_rollout, "C x:", GLUI_EDITTEXT_FLOAT, &c_x);
-    glui->add_edittext_to_panel(height_rollout, "C y:", GLUI_EDITTEXT_FLOAT, &c_y);
-    glui->add_edittext_to_panel(height_rollout, "C z:", GLUI_EDITTEXT_FLOAT, &c_z);
+    GLUI_Panel *c_x_panel = new GLUI_Panel (height_rollout, "");
+    c_x_edittext = glui->add_edittext_to_panel(c_x_panel, "C x:", GLUI_EDITTEXT_FLOAT, &c_x);
+    glui->add_column_to_panel(c_x_panel, false);
+    GLUI_Button *increase_c_x = new GLUI_Button(c_x_panel, "+", EYE_X_INCREASE_ID, control_cb);
+    increase_c_x->set_w(10);
+    glui->add_column_to_panel(c_x_panel, false);
+    GLUI_Button *decrease_c_x = new GLUI_Button(c_x_panel, "-", EYE_X_DECREASE_ID, control_cb);
+    decrease_c_x->set_w(10);
+
+    GLUI_Panel *c_y_panel = new GLUI_Panel (height_rollout, "");
+    c_y_edittext = glui->add_edittext_to_panel(c_y_panel, "C y:", GLUI_EDITTEXT_FLOAT, &c_y);
+    glui->add_column_to_panel(c_y_panel, false);
+    GLUI_Button *increase_c_y = new GLUI_Button(c_y_panel, "+", EYE_Y_INCREASE_ID, control_cb);
+    increase_c_y->set_w(10);
+    glui->add_column_to_panel(c_y_panel, false);
+    GLUI_Button *decrease_c_y = new GLUI_Button(c_y_panel, "-", EYE_Y_DECREASE_ID, control_cb);
+    decrease_c_y->set_w(10);
+
+    GLUI_Panel *c_z_panel = new GLUI_Panel (height_rollout, "");
+    c_z_edittext = glui->add_edittext_to_panel(c_z_panel, "C z:", GLUI_EDITTEXT_FLOAT, &c_z);
+    glui->add_column_to_panel(c_z_panel, false);
+    GLUI_Button *increase_c_z = new GLUI_Button(c_z_panel, "+", EYE_Z_INCREASE_ID, control_cb);
+    increase_c_z->set_w(10);
+    glui->add_column_to_panel(c_z_panel, false);
+    GLUI_Button *decrease_c_z = new GLUI_Button(c_z_panel, "-", EYE_Z_DECREASE_ID, control_cb);
+    decrease_c_z->set_w(10);
 
 
     GLUI_Panel *scale_panel = new GLUI_Panel (height_rollout, "");
