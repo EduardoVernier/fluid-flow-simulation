@@ -76,7 +76,7 @@ void drag(int mx, int my)
     static int lmx=0,lmy=0;				//remembers last mouse location
 
     // Compute the array index that corresponds to the cursor location
-    xi = (int)clamp((double)(DIM + 1) * ((double)mx / (double)winWidth));
+    xi = (int)clamp((double)(DIM + 1) * ((double)mx / (double)winWidth*1.05));
     yi = (int)clamp((double)(DIM + 1) * ((double)(winHeight - my) / (double)winHeight));
 
     X = xi; Y = yi;
@@ -115,8 +115,6 @@ void update_variables_config_window()
     eye_x_edittext->set_float_val(eye_x);
     eye_y_edittext->set_float_val(eye_y);
     eye_z_edittext->set_float_val(eye_z);
-
-
 }
 
 // resume: Unfortunate solution to rendering glui windows
@@ -432,11 +430,9 @@ void init_control_window()
     GLUI_Button *decrease_eye_z = new GLUI_Button(eye_z_panel, "-", EYE_Z_DECREASE_ID, control_cb);
     decrease_eye_z->set_w(10);
 
-
     glui->add_edittext_to_panel(height_rollout, "C x:", GLUI_EDITTEXT_FLOAT, &c_x);
     glui->add_edittext_to_panel(height_rollout, "C y:", GLUI_EDITTEXT_FLOAT, &c_y);
     glui->add_edittext_to_panel(height_rollout, "C z:", GLUI_EDITTEXT_FLOAT, &c_z);
-
 
 
     GLUI_Panel *scale_panel = new GLUI_Panel (height_rollout, "");

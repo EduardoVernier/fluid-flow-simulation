@@ -17,8 +17,7 @@ fftw_real *der_sfx, *der_sfy;     //(vx,vy)   = derivate of the currently select
 // Slice data structure variables
 Slices slices = Slices(10);
 
-
-extern int main_window;
+extern int main_window, colorbar_window;
 extern int frozen;
 extern float dataset_max, dataset_min;
 extern int matter_dataset;
@@ -156,6 +155,8 @@ void compute_derivatives()
 		current_sf = v_mag;
 	else if (matter_dataset == SCALAR_FORCE_MAG)
 		current_sf = f_mag;
+    else if (matter_dataset == SCALAR_VELOC_DIV || matter_dataset == SCALAR_FORCE_DIV)
+        current_sf = div_vf;
 
 	for (int i = 0; i < DIM; ++i)
 	{

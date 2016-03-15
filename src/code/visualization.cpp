@@ -150,8 +150,8 @@ void draw_colorbar()
 		glEnable(GL_TEXTURE_1D);
 		glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
         set_color(current_value, scalar_colormap);
-		glRectd(0.9*winWidth, i*((winHeight-80)/n_samples)+40,
-                0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
+		glRectd(0.95*winWidth, i*((winHeight-80)/n_samples)+40,
+                0.97*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
 
 		glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
 		glDisable(GL_TEXTURE_1D);
@@ -164,7 +164,7 @@ void draw_colorbar()
             glPushMatrix();
             glLoadIdentity();
 			//glColor3f(1,1,1);
-            glRasterPos2i( 0.96*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
+            glRasterPos2i( 0.975*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
             for (unsigned j = 0; j < 5; ++j ) //only first 5 characters
             {
                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[j]);
@@ -218,7 +218,7 @@ void compute_normal(int idx, float *norm)
 //visualize: This is the main visualization function
 void visualize(void)
 {
-    fftw_real wn = (fftw_real)(winWidth*0.9) / (fftw_real)(DIM + 1);   // Grid cell width
+    fftw_real wn = (fftw_real)(winWidth*0.95) / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
     fftw_real *dataset;
@@ -373,11 +373,6 @@ void visualize(void)
          glutSwapBuffers();
 		 glDisable(GL_TEXTURE_1D);
     }
-
-
-
-
-
 
 	if (draw_glyphs_flag)
         glyphs.draw_glyphs();
