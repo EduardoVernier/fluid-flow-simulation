@@ -23,10 +23,18 @@ void Glyphs::draw_glyphs()
         vf_x = vx;
         vf_y = vy;
     }
-    else if (VECTOR_FORCE)
+    else if (vector_field == VECTOR_FORCE)
     {
         vf_x = fx;
         vf_y = fy;
+    }
+
+    switch (scalar_field) {
+    case SCALAR_RHO:
+    case SCALAR_VELOC_MAG:
+    case SCALAR_FORCE_MAG:
+        glEnable(GL_TEXTURE_1D);
+        break;
     }
 
     if (glyph_type == GLYPH_LINE)
@@ -112,6 +120,14 @@ void Glyphs::draw_glyphs()
             }
             glEnd();
     }
+
+    switch (scalar_field) {
+    case SCALAR_RHO:
+    case SCALAR_VELOC_MAG:
+    case SCALAR_FORCE_MAG:
+        glDisable(GL_TEXTURE_1D);
+        break;
+    }
 }
 
 void Glyphs::bilinear_interpolation(double *vec, double *vf_x, double *vf_y, double i, double j)
@@ -142,23 +158,38 @@ void Glyphs::bilinear_interpolation(double *vec, double *vf_x, double *vf_y, dou
 void Glyphs::color_glyph(int i, int j)
 {
     int idx = (j * DIM) + i;
+    double v;
+
     switch (scalar_field) {
     case SCALAR_WHITE:
         glColor3f(1,1,1);
-        break;
+        return;
     case SCALAR_DIR:
         direction_to_color(vf_x[idx],vf_y[idx]);
-        break;
+        return;
     case SCALAR_RHO:
-        glTexCoord1f(rho[idx]);
+        v = rho[idx];
         break;
     case SCALAR_VELOC_MAG:
-        glTexCoord1f(v_mag[idx]);
+        v = v_mag[idx];
         break;
     case SCALAR_FORCE_MAG:
-        glTexCoord1f(f_mag[idx]);
+        v = f_mag[idx];
         break;
     }
+
+    double out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
+    if (clamp_flag)
+    {
+        if (v > clamp_max) v = clamp_max; if (v < clamp_min) v = clamp_min;
+        // map interval clamp_min - clamp_max -> out_min - out_max
+        v = (v - clamp_min) * (out_max - out_min) / (clamp_max - clamp_min) + out_min;
+    }
+
+    if (scaling_flag)
+        v = (v - dataset_min) * (out_max - out_min) / (dataset_max - dataset_min) + out_min;
+
+    glTexCoord1f(v);
 }
 
 void Glyphs::direction_to_color(float x, float y)

@@ -20,6 +20,7 @@ float clamp_min = 0, clamp_max = 0.2;
 int scaling_flag = 0;
 float dataset_min = 0, dataset_max = 10;
 int quantize_colormap = 0;
+int draw_colorbar_flag = 1;
 double colorbar_min = 0;
 double colorbar_max = 1;
 ColorMap fire = ColorMap((char*)"Fire");
@@ -89,7 +90,6 @@ void create_1D_textures(int colormap) //Create one 1D texture for the rainbow co
 	}
 	glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,size,0,GL_RGB,GL_FLOAT,textureImage);
 
-
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -111,7 +111,6 @@ void init_colormaps()
 //set_color: Sets three different types of colormaps
 void set_color(double v, int colormap)
 {
-    Color c;
     double out_min = 0, out_max = 1; // considering that values on the simulation and visualization range 0-1 (which they don't!)
 
     if (clamp_flag)
@@ -284,8 +283,6 @@ void visualize(void)
             glEnd();
         }
 		glDisable(GL_TEXTURE_1D);
-		draw_colorbar();
-
     }
 
     if (draw_height_flag)
@@ -373,6 +370,9 @@ void visualize(void)
          glutSwapBuffers();
 		 glDisable(GL_TEXTURE_1D);
     }
+
+	if (draw_colorbar_flag)
+		draw_colorbar();
 
 	if (draw_glyphs_flag)
         glyphs.draw_glyphs();
