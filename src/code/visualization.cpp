@@ -56,17 +56,17 @@ void create_1D_textures(int colormap) //Create one 1D texture for the rainbow co
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 
 	glBindTexture(GL_TEXTURE_1D,textureID[0]);
-	const int size = 256;
+	int size;
+	if (quantize_colormap == 0)
+		size = 256;
+	else
+		size = quantize_colormap;
+
 	float textureImage[3*size];
+
 	for(int j=0;j<size;++j)
 	{
 		float v = float(j)/(size-1);
-		if (quantize_colormap != 0)
-		{
-			v *= quantize_colormap;
-			v = (int)(v);
-			v/= quantize_colormap;
-		}
 		Color c;
 		switch(colormap)
 	    {
