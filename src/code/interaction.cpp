@@ -47,7 +47,7 @@ GLUI_EditText *c_x_edittext, *c_y_edittext, *c_z_edittext;
 
 // parameters window and custom colormap window global pointers
 GLUI *glui;
-GLUI *cust_window;
+GLUI *cust_window = NULL;
 
 
 
@@ -138,13 +138,18 @@ void add_range_to_custom_cm (int i)
     Color b = Color(args[3], args[4], args[5]);
 
     custom.add_color_range(a, b, args[6], args[7]);
+    create_1D_textures(COLOR_CUSTOM);
     resume(0);
     cust_window->close();
+    cust_window = NULL;
 }
 
 // handle_custom_colormap: Deals with the custom colormap window
 void handle_custom_colormap()
 {
+    if (cust_window != NULL)
+        return;
+
     cust_window = GLUI_Master.create_glui("Custom Dataset");
 
     float *colormap_args = (float *) malloc(8*sizeof(float));
