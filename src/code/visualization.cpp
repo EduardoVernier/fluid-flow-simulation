@@ -28,7 +28,8 @@ ColorMap rainbow = ColorMap((char*)"Rainbow");
 ColorMap custom = ColorMap((char*)"Custom");
 int custom_color_index = 0;
 float **custom_color_ranges = (float**) malloc(5*(sizeof(float*))); // up to 5 interpolations on a custom colormap
-unsigned int textureID[1];
+unsigned int matter_texture[1];
+unsigned int isoline_texture[1];
 
 // Matter visualization variables
 int draw_matter = 1; // draw the smoke (matter) or not
@@ -51,12 +52,12 @@ int draw_height_flag = 0;
 int height_dataset_coloring = SCALAR_RHO;
 float dataset_scale = 30;
 
-void create_1D_textures(int colormap) //Create one 1D texture for the rainbow colormap
+void update_textures()
 {
-	glGenTextures(1,textureID);
+	// Matter colormap
+	glGenTextures(1, matter_texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-
-	glBindTexture(GL_TEXTURE_1D,textureID[0]);
+	glBindTexture(GL_TEXTURE_1D,matter_texture[0]);
 	int size;
 	if (quantize_colormap == 0)
 		size = 256;
@@ -64,12 +65,11 @@ void create_1D_textures(int colormap) //Create one 1D texture for the rainbow co
 		size = quantize_colormap;
 
 	float textureImage[3*size];
-
 	for(int j=0;j<size;++j)
 	{
 		float v = float(j)/(size-1);
 		Color c;
-		switch(colormap)
+		switch(scalar_colormap)
 	    {
 	    case COLOR_BLACKWHITE:
 			c = Color(v,v,v);
@@ -89,12 +89,45 @@ void create_1D_textures(int colormap) //Create one 1D texture for the rainbow co
 		textureImage[3*j+2] = c.b;
 	}
 	glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,size,0,GL_RGB,GL_FLOAT,textureImage);
-
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_1D,textureID[0]);
+    glBindTexture(GL_TEXTURE_1D,matter_texture[0]);
+
+	// Isoline colormap
+	glGenTextures(1, isoline_texture);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glBindTexture(GL_TEXTURE_1D,isoline_texture[0]);
+	for(int j=0;j<size;++j)
+	{
+		float v = float(j)/(size-1);
+		Color c;
+		switch(isoline_colormap)
+	    {
+	    case COLOR_BLACKWHITE:
+			c = Color(v,v,v);
+			break;
+	    case COLOR_RAINBOW:
+	        c = rainbow.get_color(v);
+	        break;
+	    case COLOR_FIRE:
+	        c = fire.get_color(v);
+	        break;
+	    case COLOR_CUSTOM:
+	        c = custom.get_color(v);
+	        break;
+	    }
+		textureImage[3*j]   = c.r;
+		textureImage[3*j+1] = c.g;
+		textureImage[3*j+2] = c.b;
+	}
+	glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,size,0,GL_RGB,GL_FLOAT,textureImage);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_1D,isoline_texture[0]);
 }
 
 
@@ -105,7 +138,7 @@ void init_colormaps()
     fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
     fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
 
-    create_1D_textures(scalar_colormap);
+    update_textures();
 }
 
 //set_color: Sets three different types of colormaps
@@ -147,6 +180,8 @@ void draw_colorbar()
 
         double current_value = colorbar_min + (i/n_samples)*(colorbar_max-colorbar_min);
 		glEnable(GL_TEXTURE_1D);
+		glBindTexture(GL_TEXTURE_1D,matter_texture[0]); // for now
+
 		glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
         set_color(current_value, scalar_colormap);
 		glRectd(0.95*winWidth, i*((winHeight-80)/n_samples)+40,
@@ -182,6 +217,9 @@ void draw_isolines(double *dataset)
     double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
     double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
 	glLineWidth(3.0);
+	glEnable(GL_TEXTURE_1D);
+	glBindTexture(GL_TEXTURE_1D, isoline_texture[0]);
+
 
     for(vector<Isoline>::iterator iso_it = isoline_manager.isoline_vector.begin(); iso_it != isoline_manager.isoline_vector.end(); ++iso_it)
     {
@@ -200,6 +238,7 @@ void draw_isolines(double *dataset)
             glEnd();
        }
     }
+	glDisable(GL_TEXTURE_1D);
 }
 
 void compute_normal(int idx, float *norm)
@@ -247,6 +286,7 @@ void visualize(void)
     if (draw_matter)
     {
 		glEnable(GL_TEXTURE_1D);
+		glBindTexture(GL_TEXTURE_1D, matter_texture[0]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_LIGHT0);
@@ -289,6 +329,7 @@ void visualize(void)
     {
         // Set "camera"
 		glEnable(GL_TEXTURE_1D);
+		glBindTexture(GL_TEXTURE_1D, matter_texture[0]);
         glEnable(GL_DEPTH_TEST);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();

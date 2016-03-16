@@ -44,12 +44,9 @@ GLUI_EditText *scale_edittext;
 GLUI_EditText *eye_x_edittext, *eye_y_edittext, *eye_z_edittext;
 GLUI_EditText *c_x_edittext, *c_y_edittext, *c_z_edittext;
 
-
 // parameters window and custom colormap window global pointers
 GLUI *glui;
 GLUI *cust_window = NULL;
-
-
 
 //keyboard: Handle key presses
 void keyboard(unsigned char key, int x, int y)
@@ -138,7 +135,7 @@ void add_range_to_custom_cm (int i)
     Color b = Color(args[3], args[4], args[5]);
 
     custom.add_color_range(a, b, args[6], args[7]);
-    create_1D_textures(COLOR_CUSTOM);
+    update_textures();
     resume(0);
     cust_window->close();
     cust_window = NULL;
@@ -243,6 +240,7 @@ void control_cb(int control)
             break;
         case APPLY_ISOLINES:
             isoline_manager.reset();
+            update_textures();
             break;
         case ENABLE_HEIGHT:
             reshape(winWidth, winHeight);
@@ -291,7 +289,7 @@ void control_cb(int control)
             break;
         case QUANT_ID:
         case UPDATE_SCALAR_COLORMAP:
-            create_1D_textures(scalar_colormap);
+            update_textures();
             break;
         }
 
@@ -434,7 +432,6 @@ void init_control_window()
     height_colormap_dataset_lb->add_item(SCALAR_VELOC_DIV, "Velocity Field Divergency");
     height_colormap_dataset_lb->add_item(SCALAR_FORCE_DIV, "Force Field Divergency");
 
-
     GLUI_Panel *eye_x_panel = new GLUI_Panel (height_rollout, "");
     eye_x_edittext = glui->add_edittext_to_panel(eye_x_panel, "Eye x:", GLUI_EDITTEXT_FLOAT, &eye_x);
     glui->add_column_to_panel(eye_x_panel, false);
@@ -489,7 +486,6 @@ void init_control_window()
     GLUI_Button *decrease_c_z = new GLUI_Button(c_z_panel, "-", EYE_Z_DECREASE_ID, control_cb);
     decrease_c_z->set_w(10);
 
-
     GLUI_Panel *scale_panel = new GLUI_Panel (height_rollout, "");
     scale_edittext = glui->add_edittext_to_panel(scale_panel, "Scale dataset:", GLUI_EDITTEXT_FLOAT, &dataset_scale);
     glui->add_column_to_panel(scale_panel, false);
@@ -499,9 +495,7 @@ void init_control_window()
     GLUI_Button *decrease_scale = new GLUI_Button(scale_panel, "-", SCALE_DECREASE_ID, control_cb);
     decrease_scale->set_w(10);
 
-
     height_rollout->close();
-
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
