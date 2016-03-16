@@ -331,7 +331,7 @@ void init_control_window()
     spacer_matter->set_w(260);
     spacer_matter->set_h(0);
     glui->add_checkbox_to_panel(matter_rollout, "Enable Matter", &draw_matter, 0, control_cb);
-    glui->add_checkbox_to_panel(matter_rollout, "Enable Colorbar", &draw_colorbar_flag, 0, control_cb);
+    glui->add_checkbox_to_panel(matter_rollout, "Enable Matter Colorbar", &draw_matter_colorbar, 0, control_cb);
 
 
     GLUI_Panel *dataset_panel = new GLUI_Panel (matter_rollout, "Dataset Selection");
@@ -398,11 +398,13 @@ void init_control_window()
     new GLUI_Button(sample_panel, "Decrease", SY_DECREASE_ID, control_cb);
     glyph_rollout->close();
 
+    // Isolines
     GLUI_Rollout *iso_rollout = glui->add_rollout ("Isolines", true);
     GLUI_StaticText *spacer_iso = glui->add_statictext_to_panel(iso_rollout, "");
     spacer_iso->set_w(260);
     spacer_iso->set_h(0);
     glui->add_checkbox_to_panel(iso_rollout, "Enable Isolines", &draw_isolines_flag, 0, control_cb);
+    glui->add_checkbox_to_panel(iso_rollout, "Enable Isolines Colorbar", &draw_isolines_colorbar, 0, control_cb);
     glui->add_edittext_to_panel(iso_rollout, "v1", GLUI_EDITTEXT_FLOAT, &isoline_manager.v1);
     glui->add_edittext_to_panel(iso_rollout, "v2", GLUI_EDITTEXT_FLOAT, &isoline_manager.v2);
     glui->add_edittext_to_panel(iso_rollout, "n" , GLUI_EDITTEXT_INT,   &isoline_manager.n);

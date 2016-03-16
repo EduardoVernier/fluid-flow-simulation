@@ -20,7 +20,8 @@ float clamp_min = 0, clamp_max = 0.2;
 int scaling_flag = 0;
 float dataset_min = 0, dataset_max = 10;
 int quantize_colormap = 0;
-int draw_colorbar_flag = 1;
+int draw_matter_colorbar = 1;
+int draw_isolines_colorbar = 0;
 double colorbar_min = 0;
 double colorbar_max = 1;
 ColorMap fire = ColorMap((char*)"Fire");
@@ -179,42 +180,60 @@ void draw_colorbar()
         colorbar_max *=1.1;
 
         double current_value = colorbar_min + (i/n_samples)*(colorbar_max-colorbar_min);
-		glEnable(GL_TEXTURE_1D);
-		glBindTexture(GL_TEXTURE_1D,matter_texture[0]); // for now
 
-		glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-        set_color(current_value, scalar_colormap);
-		glRectd(0.95*winWidth, i*((winHeight-80)/n_samples)+40,
-                0.97*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
+		if (draw_matter_colorbar)
+		{
+			glEnable(GL_TEXTURE_1D);
+			glBindTexture(GL_TEXTURE_1D,matter_texture[0]);
+			glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+			set_color(current_value, scalar_colormap);
+			glRectd(0.955*winWidth, i*((winHeight-80)/n_samples)+40,
+					0.965*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
 
-		glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-		glDisable(GL_TEXTURE_1D);
+			glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+			glDisable(GL_TEXTURE_1D);
+		}
 
+		if (draw_isolines_colorbar)
+		{
+			glEnable(GL_TEXTURE_1D);
+			glBindTexture(GL_TEXTURE_1D,isoline_texture[0]);
+			glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+			set_color(current_value, scalar_colormap);
+			glRectd(0.94*winWidth, i*((winHeight-80)/n_samples)+40,
+					0.95*winWidth, (i+1)*((winHeight-80)/n_samples)+40);
 
-        if(i % ((int)n_samples/10) == 0)
-        {
-            std::string str = std::to_string(current_value);
-            glMatrixMode( GL_MODELVIEW );
-            glPushMatrix();
-            glLoadIdentity();
-			//glColor3f(1,1,1);
-            glRasterPos2i( 0.975*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
-            for (unsigned j = 0; j < 5; ++j ) //only first 5 characters
-            {
-                glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[j]);
-            }
-            glPopMatrix();
-            glMatrixMode( GL_PROJECTION );
-            glPopMatrix();
-            glMatrixMode( GL_MODELVIEW );
-        }
+			glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+			glDisable(GL_TEXTURE_1D);
+		}
+
+		if (draw_isolines_colorbar || draw_matter_colorbar)
+		{
+			if(i % ((int)n_samples/10) == 0)
+			{
+				std::string str = std::to_string(current_value);
+				glMatrixMode( GL_MODELVIEW );
+				glPushMatrix();
+				glLoadIdentity();
+				//glColor3f(1,1,1);
+				glRasterPos2i( 0.975*winWidth, i*((winHeight-80)/n_samples)+40);  // move in 10 pixels from the left and bottom edges
+				for (unsigned j = 0; j < 5; ++j ) //only first 5 characters
+				{
+					glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[j]);
+				}
+				glPopMatrix();
+				glMatrixMode( GL_PROJECTION );
+				glPopMatrix();
+				glMatrixMode( GL_MODELVIEW );
+			}
+		}
     }
 }
 
 
 void draw_isolines(double *dataset)
 {
-    double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
+    double wn = (double)(winWidth*0.95) / (double)(DIM + 1);   // Grid cell width
     double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
 	glLineWidth(3.0);
 	glEnable(GL_TEXTURE_1D);
@@ -239,6 +258,7 @@ void draw_isolines(double *dataset)
        }
     }
 	glDisable(GL_TEXTURE_1D);
+	glLineWidth(1.0);
 }
 
 void compute_normal(int idx, float *norm)
@@ -412,7 +432,7 @@ void visualize(void)
 		 glDisable(GL_TEXTURE_1D);
     }
 
-	if (draw_colorbar_flag)
+	if (draw_matter_colorbar)
 		draw_colorbar();
 
 	if (draw_glyphs_flag)
