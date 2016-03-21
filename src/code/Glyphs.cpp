@@ -40,7 +40,7 @@ void Glyphs::draw_glyphs()
     if (glyph_type == GLYPH_LINE)
     {
         glBegin(GL_LINES);
-        for (double i = 0; i < DIM/2+0.01; i += (DIM/(double)x_axis_samples))
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
         {
             for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
             {
