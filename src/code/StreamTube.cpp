@@ -1,13 +1,6 @@
 #include "StreamTube.h"
 
 
-StreamTube::StreamTube(int x, int y)
-{
-    p0x = x;
-    p0y = y;
-}
-
-
 void StreamTube::calc_all_points(float dt)
 {
     float px, py, pnx, pny;
@@ -24,7 +17,11 @@ void StreamTube::calc_all_points(float dt)
         pnx = px + vec[0]*dt;
         pny = py + vec[1]*dt;
 
-        stream_tube_points.push_back(std::make_pair(pnx, pny));
+        if (isfinite(pnx)&&isfinite(pny))
+            stream_tube_points.push_back(std::make_pair(pnx, pny));
+        else
+            return;
+
     }
 }
 
@@ -49,5 +46,9 @@ void StreamTube::vf_bilinear_interpolation(float *vec, int slice_idx, float i, f
 
     vec[0] = x_fxy;
     vec[1] = y_fxy;
+
+    //if (vec[0] < 0) vec[0] = 0;
+    //if (vec[1] < 0) vec[1] = 0;
+
 
 }

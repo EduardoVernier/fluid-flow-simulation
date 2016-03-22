@@ -11,9 +11,10 @@ using namespace std;
 class StreamTube
 {
 public:
-    StreamTube(int x, int y);
+    StreamTube(int x, int y) : p0x(x), p0y(y) {};
     void calc_all_points(float dt);
     void vf_bilinear_interpolation(float *vec, int slice_idx, float i, float j);
+
     vector< pair<float, float> > stream_tube_points;
     int p0x, p0y;
     int n_points = slices.get_number_of_slices();

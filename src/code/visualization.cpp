@@ -55,7 +55,7 @@ float dataset_scale = 30;
 
 // Stream Tubes variables
 int draw_st_flag = 0;
-StreamTube *stream_tube = NULL;
+StreamTubeManager stream_tube_manager = StreamTubeManager();
 
 void update_textures()
 {
@@ -282,14 +282,18 @@ void draw_stream_tubes()
     fftw_real wn = (fftw_real)(winWidth*0.95) / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
-    stream_tube->calc_all_points(100.0);
 
-    for (unsigned i = 0; i < stream_tube->stream_tube_points.size();++i)
-    {
-        glColor3f(1,1,1);
-        glRectd(wn*stream_tube->stream_tube_points[i].first,   hn*stream_tube->stream_tube_points[i].second,
-                wn*stream_tube->stream_tube_points[i].first+5, hn*stream_tube->stream_tube_points[i].second + 5);
-    }
+    for(unsigned j = 0; j < stream_tube_manager.stream_tube_vector.size(); ++j)
+	{
+        stream_tube_manager.stream_tube_vector[j].calc_all_points(100);
+        for (unsigned i = 0; i < stream_tube_manager.stream_tube_vector[j].stream_tube_points.size(); ++i)
+		{
+			glColor3f(1,1,1);            
+            vector<pair<float, float> > v = stream_tube_manager.stream_tube_vector[j].stream_tube_points;
+			glRectd(wn*v[i].first, hn*v[i].second,
+				    wn*v[i].first+5, hn*v[i].second + 5);
+        }
+	}
 }
 
 //visualize: This is the main visualization function
@@ -468,7 +472,7 @@ void visualize(void)
         draw_isolines(dataset);
     }
 
-    if (draw_st_flag && stream_tube != NULL)
+    if (draw_st_flag)
     {
         draw_stream_tubes();
     }

@@ -71,7 +71,7 @@ void keyboard(unsigned char key, int x, int y)
         if (draw_glyphs_flag==0) draw_matter = 1; break;
     //case 'm': scalar_colormap++; if (scalar_colormap>COLOR_BANDS) scalar_colormap=COLOR_BLACKWHITE; break;
     case 'a': frozen = 1-frozen; break;
-    case ' ': stream_tube = new StreamTube(mxi, myi); break;
+    case ' ': stream_tube_manager.add_stream_tube(mxi, myi); break;
     case 'q': exit(0);
     }
 }
