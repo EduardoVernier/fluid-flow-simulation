@@ -53,6 +53,10 @@ int draw_height_flag = 0;
 int height_dataset_coloring = SCALAR_RHO;
 float dataset_scale = 30;
 
+// Stream Tubes variables
+int draw_st_flag = 0;
+StreamTube *stream_tube = NULL;
+
 void update_textures()
 {
 	// Matter colormap
@@ -273,6 +277,21 @@ void compute_normal(int idx, float *norm)
     norm[0] = 1.0/v_lenght;
 }
 
+void draw_stream_tubes()
+{
+    fftw_real wn = (fftw_real)(winWidth*0.95) / (fftw_real)(DIM + 1);   // Grid cell width
+    fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
+
+    stream_tube->calc_all_points(100.0);
+
+    for (unsigned i = 0; i < stream_tube->stream_tube_points.size();++i)
+    {
+        glColor3f(1,1,1);
+        glRectd(wn*stream_tube->stream_tube_points[i].first,   hn*stream_tube->stream_tube_points[i].second,
+                wn*stream_tube->stream_tube_points[i].first+5, hn*stream_tube->stream_tube_points[i].second + 5);
+    }
+}
+
 //visualize: This is the main visualization function
 void visualize(void)
 {
@@ -364,15 +383,18 @@ void visualize(void)
         glShadeModel(GL_SMOOTH);
         glEnable(GL_COLOR_MATERIAL); // Tell OpenGL to use the values passed by glColor() as material properties
 
-        GLfloat light0_ambient[] =  {0.1f, 0.1f, 0.3f, 1.0f};
+        GLfloat light0_ambient[] =  {.2f, 0.2f, 0.2f, 1.0f};
         GLfloat light0_diffuse[] =  {.6f, .6f, 1.0f, 1.0f};
         GLfloat light0_position[] = {500.0f, 500.0f, 10.0f, 0.0f};
+        GLfloat mat_shininess[] = { 90.0 };
 
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
+        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
         glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
         glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
         glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
+
 
 
         float norm [3];
@@ -444,6 +466,11 @@ void visualize(void)
             isoline_manager.reset();
         isoline_manager.compute_isolines();
         draw_isolines(dataset);
+    }
+
+    if (draw_st_flag && stream_tube != NULL)
+    {
+        draw_stream_tubes();
     }
 }
 

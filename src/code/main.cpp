@@ -21,6 +21,8 @@ using namespace std;
 #include "Glyphs.h"
 #include "IsolineManager.h"
 #include "Slices.h"
+#include "StreamTube.h"
+#include "StreamTubeManager.h"
 
 #include "simulation.cpp"
 #include "visualization.cpp"
@@ -52,6 +54,7 @@ int main(int argc, char **argv)
 	glutIdleFunc(do_one_simulation_step);
 	glutKeyboardFunc(keyboard);
 	glutMotionFunc(drag);
+    glutPassiveMotionFunc(mouse_hover);
 
 	init_colormaps();
 	init_simulation(DIM);	//initialize the simulation data structures

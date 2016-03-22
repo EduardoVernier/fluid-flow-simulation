@@ -33,7 +33,8 @@ C_Z_INCREASE_ID,
 C_Z_DECREASE_ID,
 SCALE_INCREASE_ID,
 SCALE_DECREASE_ID,
-UPDATE_SCALAR_COLORMAP
+UPDATE_SCALAR_COLORMAP,
+MANAGE_ST_SEEDS
 };
 
 // statictext objects pointers are global because control_cb callback
@@ -47,6 +48,10 @@ GLUI_EditText *c_x_edittext, *c_y_edittext, *c_z_edittext;
 // parameters window and custom colormap window global pointers
 GLUI *glui;
 GLUI *cust_window = NULL;
+GLUI *st_seeds_window = NULL;
+
+// mouse variables
+int mxi = 0, myi = 0;
 
 //keyboard: Handle key presses
 void keyboard(unsigned char key, int x, int y)
@@ -66,10 +71,18 @@ void keyboard(unsigned char key, int x, int y)
         if (draw_glyphs_flag==0) draw_matter = 1; break;
     //case 'm': scalar_colormap++; if (scalar_colormap>COLOR_BANDS) scalar_colormap=COLOR_BLACKWHITE; break;
     case 'a': frozen = 1-frozen; break;
+    case ' ': stream_tube = new StreamTube(mxi, myi); break;
     case 'q': exit(0);
     }
 }
 
+void mouse_hover(int mx, int my)
+{
+    // Compute the array index that corresponds to the cursor location
+    mxi = (int)clamp((double)(DIM + 1) * ((double)mx / (double)winWidth*1.05));
+    myi = (int)clamp((double)(DIM + 1) * ((double)(winHeight - my) / (double)winHeight));
+    // printf("%d  %d\n", mxi, myi);
+}
 
 // drag: When the user drags with the mouse, add a force that corresponds to the direction of the mouse
 //       cursor movement. Also inject some new matter into the field at the mouse location.
@@ -178,6 +191,15 @@ void handle_custom_colormap()
 
     GLUI_Master.auto_set_viewport();
     cust_window->set_main_gfx_window(main_window);
+}
+
+void handle_st_seeds()
+{
+    if (cust_window != NULL)
+        return;
+
+    st_seeds_window = GLUI_Master.create_glui("Manage ST Seeds");
+
 }
 
 // control_cb: Takes (almost) all callbacks from buttons, checkboxes, etc.
@@ -291,6 +313,9 @@ void control_cb(int control)
         case UPDATE_SCALAR_COLORMAP:
             update_textures();
             break;
+        case MANAGE_ST_SEEDS:
+            handle_st_seeds();
+            break;
         }
 
         update_variables_config_window();
@@ -348,7 +373,7 @@ void init_control_window()
     scalar_colormap_lb->add_item(COLOR_BLACKWHITE, "Greyscale");
     scalar_colormap_lb->add_item(COLOR_FIRE, "Fire");
     scalar_colormap_lb->add_item(COLOR_CUSTOM, "Custom");
-    scalar_colormap_lb->add_item(COLOR_RAINBOW_1D, "Rainbow (1D Texture)");
+    //scalar_colormap_lb->add_item(COLOR_RAINBOW_1D, "Rainbow (1D Texture)");
     new GLUI_Button(color_panel, "Edit custom colormap", COLOR_CUSTOM, control_cb);
     glui->add_edittext_to_panel(color_panel, "Quantize:", GLUI_EDITTEXT_INT, &quantize_colormap, QUANT_ID, control_cb);
 
@@ -372,11 +397,11 @@ void init_control_window()
     vector_dataset_lb->add_item(VECTOR_FORCE, "Force Field");
 
     GLUI_Listbox *scalar_dataset_glyph_lb = glui->add_listbox_to_panel(glyph_rollout, "Color value:", &glyphs.scalar_field);
-    scalar_dataset_glyph_lb->add_item(SCALAR_DIR, "Vector Direction");
     scalar_dataset_glyph_lb->add_item(SCALAR_RHO, "Fluid Density");
     scalar_dataset_glyph_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
-    scalar_dataset_glyph_lb->add_item(SCALAR_WHITE, "White");
     scalar_dataset_glyph_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
+    scalar_dataset_glyph_lb->add_item(SCALAR_DIR, "Vector Direction");
+    scalar_dataset_glyph_lb->add_item(SCALAR_WHITE, "White");
 
     GLUI_Listbox *glyph_type_lb = glui->add_listbox_to_panel(glyph_rollout, "Glypth Type:", &glyphs.glyph_type);
     glyph_type_lb->add_item(GLYPH_ARROW, "Arrow");
@@ -498,6 +523,15 @@ void init_control_window()
     decrease_scale->set_w(10);
 
     height_rollout->close();
+
+    // Stream tubes
+    GLUI_Rollout *st_rollout = glui->add_rollout ("Stream Tubes", true);
+    GLUI_StaticText *spacer_st = glui->add_statictext_to_panel(st_rollout, "");
+    spacer_st->set_w(260);
+    spacer_st->set_h(0);
+    glui->add_checkbox_to_panel(st_rollout, "Enable Stream Tubes", &draw_st_flag, 0, control_cb);
+    new GLUI_Button(st_rollout, "Manage Seeds", MANAGE_ST_SEEDS, control_cb);
+    st_rollout->close();
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);
     new GLUI_Button(glui, "Quit", QT_ID, control_cb);
