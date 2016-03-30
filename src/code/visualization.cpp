@@ -140,8 +140,9 @@ void init_colormaps()
 {
     // Example of how to "build" a colormap
     fire.add_color_range(Color(0,0,0), Color(1,0,0), 0, 0.5);
-    fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 1);
-    fire.add_color_range(Color(1,1,0), Color(1,1,1), 1, 10);
+    fire.add_color_range(Color(1,0,0), Color(1,1,0), 0.5, 0.9);
+	fire.add_color_range(Color(1,1,0), Color(1,1,1), 0.9, 1);
+    fire.add_color_range(Color(1,1,1), Color(1,1,1), 1, 10);
 
     update_textures();
 }
@@ -288,7 +289,7 @@ void draw_stream_tubes()
         stream_tube_manager.stream_tube_vector[j].calc_all_points(100);
         for (unsigned i = 0; i < stream_tube_manager.stream_tube_vector[j].stream_tube_points.size(); ++i)
 		{
-			glColor3f(1,1,1);            
+			glColor3f(1,1,1);
             vector<pair<float, float> > v = stream_tube_manager.stream_tube_vector[j].stream_tube_points;
 			glRectd(wn*v[i].first, hn*v[i].second,
 				    wn*v[i].first+5, hn*v[i].second + 5);
