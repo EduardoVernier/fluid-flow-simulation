@@ -3,6 +3,8 @@
 //--------------------------------------------------------------------------------------------------
 
 using namespace std;
+#define _USE_MATH_DEFINES
+
 
 #include <rfftw.h>              //the numerical simulation FFTW library
 #include <stdio.h>              //for printing the help text

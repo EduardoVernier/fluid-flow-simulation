@@ -34,7 +34,7 @@ C_Z_DECREASE_ID,
 SCALE_INCREASE_ID,
 SCALE_DECREASE_ID,
 UPDATE_SCALAR_COLORMAP,
-MANAGE_ST_SEEDS
+ENABLE_ST
 };
 
 // statictext objects pointers are global because control_cb callback
@@ -214,8 +214,8 @@ void control_cb(int control)
     }
     else
     {
-        frozen = 1;
-        glutTimerFunc(100, resume, 0);
+        //frozen = 1;
+        //glutTimerFunc(100, resume, 0);
 
         switch (control)
         {
@@ -313,8 +313,8 @@ void control_cb(int control)
         case UPDATE_SCALAR_COLORMAP:
             update_textures();
             break;
-        case MANAGE_ST_SEEDS:
-            handle_st_seeds();
+        case ENABLE_ST:
+            update_textures();
             break;
         }
 
@@ -529,8 +529,10 @@ void init_control_window()
     GLUI_StaticText *spacer_st = glui->add_statictext_to_panel(st_rollout, "");
     spacer_st->set_w(260);
     spacer_st->set_h(0);
-    glui->add_checkbox_to_panel(st_rollout, "Enable Stream Tubes", &draw_st_flag, 0, control_cb);
-    new GLUI_Button(st_rollout, "Manage Seeds", MANAGE_ST_SEEDS, control_cb);
+    glui->add_checkbox_to_panel(st_rollout, "Enable Stream Tubes", &draw_st_flag, ENABLE_ST, control_cb);
+    glui->add_edittext_to_panel(st_rollout, "Number of segments:", GLUI_EDITTEXT_INT, &slices.number_of_slices);
+
+    //new GLUI_Button(st_rollout, "Manage Seeds", ENABLE_ST, control_cb);
     st_rollout->close();
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);

@@ -7,11 +7,11 @@ void StreamTube::calc_all_points(float dt)
     float vec[2];
     int error = 0;
     stream_tube_points.clear();
-    stream_tube_points.push_back(std::make_pair(p0x, p0y));
-    for (int i = 0; i < n_points; ++i)
+    stream_tube_points.push_back(make_tuple(p0x, p0y, rho[int(floor(pnx)+50*floor(pny))]));
+    for (int i = 0; i < slices.number_of_slices; ++i)
     {
-        px = (stream_tube_points.back()).first;
-        py = (stream_tube_points.back()).second;
+        px = std::get<0>(stream_tube_points.back());
+        py = std::get<1>(stream_tube_points.back());
 
         error = vf_bilinear_interpolation(vec, i, px, py);
         if (error) return;
@@ -20,7 +20,7 @@ void StreamTube::calc_all_points(float dt)
         pny = py + vec[1]*dt;
 
         if (isfinite(pnx)&&isfinite(pny))
-            stream_tube_points.push_back(std::make_pair(pnx, pny));
+            stream_tube_points.push_back(make_tuple(pnx, pny, rho[int(floor(pnx)+50*floor(pny))]));
         else
             return;
 

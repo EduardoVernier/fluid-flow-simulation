@@ -278,23 +278,76 @@ void compute_normal(int idx, float *norm)
     norm[0] = 1.0/v_lenght;
 }
 
+void cross_product(float ax, float ay, float az, float bx, float by, float bz, float *rx, float *ry, float *rz)
+{
+	float v_lenght = sqrtf(pow(ax-bx,2)
+						   + pow(ay-by,2)
+						   + pow(az-bz,2));
+	if (v_lenght < 1.0e-6)
+		v_lenght = 1;
+
+	*rx = (ay*bz - az*by)/v_lenght;
+	*ry = (az*bx - ax*bz)/v_lenght;
+	*rz = (ax*by - ay*bx)/v_lenght;
+
+}
+
 void draw_stream_tubes()
 {
     fftw_real wn = (fftw_real)(winWidth*0.95) / (fftw_real)(DIM + 1);   // Grid cell width
     fftw_real hn = (fftw_real)(winHeight) / (fftw_real)(DIM + 1);  // Grid cell heigh
 
+	int points = 20;
+	double slice = 2*M_PI/points;
+	float height_scale = 10;
 
-    for(unsigned j = 0; j < stream_tube_manager.stream_tube_vector.size(); ++j)
+	glEnable(GL_TEXTURE_1D);
+	glBindTexture(GL_TEXTURE_1D, isoline_texture[0]);
+
+    for(unsigned tube = 0; tube < stream_tube_manager.stream_tube_vector.size(); ++tube)
 	{
-        stream_tube_manager.stream_tube_vector[j].calc_all_points(100);
-        for (unsigned i = 0; i < stream_tube_manager.stream_tube_vector[j].stream_tube_points.size(); ++i)
+        stream_tube_manager.stream_tube_vector[tube].calc_all_points(100);
+		vector<tuple<float, float, float> > v = stream_tube_manager.stream_tube_vector[tube].stream_tube_points;
+
+        for (unsigned i = 0; i < stream_tube_manager.stream_tube_vector[tube].stream_tube_points.size()-1; ++i)
 		{
-			glColor3f(1,1,1);
-            vector<pair<float, float> > v = stream_tube_manager.stream_tube_vector[j].stream_tube_points;
-			glRectd(wn*v[i].first, hn*v[i].second,
-				    wn*v[i].first+5, hn*v[i].second + 5);
+			glBegin(GL_TRIANGLE_STRIP);
+			for (int k = 0; k < points; ++k)
+			{
+				double angle = slice * k;
+				float radius1 = std::get<2>(v[i]) * 10;
+				float radius2 = std::get<2>(v[i+1]) * 10;
+
+				float x1 = wn*std::get<0>(v[i]) + radius1*cos(angle);
+				float y1 = hn*std::get<1>(v[i]) + radius1*sin(angle);
+				float z1 = i*height_scale;
+				float x2 = wn*std::get<0>(v[i+1]) + radius2*cos(angle);
+				float y2 = hn*std::get<1>(v[i+1]) + radius2*sin(angle);
+				float z2 = (i+1)*height_scale;
+				angle = slice * (k+1);
+				float x3 = wn*std::get<0>(v[i]) + radius1*cos(angle);
+				float y3 = hn*std::get<1>(v[i]) + radius1*sin(angle);
+				float z3 = i*height_scale;
+				float x4 = wn*std::get<0>(v[i+1]) + radius2*cos(angle);
+				float y4 = hn*std::get<1>(v[i+1]) + radius2*sin(angle);
+				float z4 = (i+1)*height_scale;
+
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+				set_color(0, isoline_colormap);
+				float nx, ny, nz;
+				cross_product(x1-x2, y1-y2, z1-z2, x1-x3, y1-y3, z1-y3, &nx, &ny, &nz);
+				glNormal3f(nx, ny, nz);
+				glVertex3f(x3, y3, z3);
+				glVertex3f(x4, y4, z4);
+		        glVertex3f(x1, y1, z1);
+		        glVertex3f(x2, y2, z2);
+			}
+
+			glEnd();
         }
 	}
+	glDisable(GL_TEXTURE_1D);
 }
 
 //visualize: This is the main visualization function
@@ -324,7 +377,6 @@ void visualize(void)
     else if (height_dataset_coloring == SCALAR_FORCE_DIV || height_dataset_coloring == SCALAR_VELOC_DIV)
         color_dataset = div_vf;
 
-	glClearColor(0,0,0,0); // Clear the frame and depth buffers
 
 
     if (draw_matter)
@@ -334,6 +386,9 @@ void visualize(void)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_LIGHT0);
+
+		glShadeModel(GL_SMOOTH);
+		glEnable(GL_COLOR_MATERIAL); // Tell OpenGL to use the values passed by glColor() as material properties
         for (int j = 0; j < DIM - 1; j++)
         {
             double px,py;
@@ -382,9 +437,6 @@ void visualize(void)
         glLoadIdentity();
         gluPerspective(fov, float(winWidth)/winHeight, z_near, z_far);
 
-		glClearColor(0,0,0,0); // Clear the frame and depth buffers
-    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glShadeModel(GL_SMOOTH);
         glEnable(GL_COLOR_MATERIAL); // Tell OpenGL to use the values passed by glColor() as material properties
 
@@ -399,8 +451,6 @@ void visualize(void)
         glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
         glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
         glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-
-
 
         float norm [3];
 
@@ -455,8 +505,7 @@ void visualize(void)
             glVertex3f(px, py, pz);
             glEnd();
         }
-         glutSwapBuffers();
-		 glDisable(GL_TEXTURE_1D);
+         glDisable(GL_TEXTURE_1D);
     }
 
 	if (draw_matter_colorbar)
@@ -483,9 +532,11 @@ void visualize(void)
 //display: Handle window redrawing events. Simply delegates to visualize().
 void display(void)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0,0,0,0); // Clear the frame and depth buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+	glEnable(GL_DEPTH_TEST);
     visualize();
     glFlush();
     glutSwapBuffers();

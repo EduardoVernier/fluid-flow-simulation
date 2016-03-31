@@ -16,7 +16,6 @@ public:
     deque <array<double, 2500> > slices_x;
     deque <array<double, 2500> > slices_y;
 
-private:
     int number_of_slices;
 };
 
