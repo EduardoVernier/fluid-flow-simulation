@@ -16,13 +16,13 @@ class StreamTube
 {
 public:
     StreamTube(int x, int y) : p0x(x), p0y(y) {};
-    void calc_all_points(float dt);
+    void calc_all_points(float dt, int radius);
     int vf_bilinear_interpolation(float *vec, int slice_idx, float i, float j);
 
     vector< tuple<float, float, float> > stream_tube_points;
     int p0x, p0y;
     int n_points = slices.number_of_slices;
-    int scalar_field = SCALAR_RHO;
+    int radius = SCALAR_RHO;
 };
 
 #endif

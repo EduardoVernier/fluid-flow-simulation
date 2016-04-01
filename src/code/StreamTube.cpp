@@ -1,7 +1,7 @@
 #include "StreamTube.h"
 
 
-void StreamTube::calc_all_points(float dt)
+void StreamTube::calc_all_points(float dt, int radius)
 {
     float px, py, pnx, pny;
     float vec[2];
@@ -19,8 +19,25 @@ void StreamTube::calc_all_points(float dt)
         pnx = px + vec[0]*dt;
         pny = py + vec[1]*dt;
 
+        float r;
+        switch (radius) {
+            case SCALAR_RHO:
+                r = rho[int(floor(pnx)+50*floor(pny))]*30;
+                break;
+            case SCALAR_FORCE_MAG:
+                r = f_mag[int(floor(pnx)+50*floor(pny))]*100;
+                break;
+            case SCALAR_VELOC_MAG:
+                r = v_mag[int(floor(pnx)+50*floor(pny))]*100;
+                break;
+            case 3:
+            case 10:
+                r = radius;
+                break;
+        }
+
         if (isfinite(pnx)&&isfinite(pny))
-            stream_tube_points.push_back(make_tuple(pnx, pny, rho[int(floor(pnx)+50*floor(pny))]));
+            stream_tube_points.push_back(make_tuple(pnx, pny, r));
         else
             return;
 

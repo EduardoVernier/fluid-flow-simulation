@@ -530,7 +530,13 @@ void init_control_window()
     spacer_st->set_w(260);
     spacer_st->set_h(0);
     glui->add_checkbox_to_panel(st_rollout, "Enable Stream Tubes", &draw_st_flag, ENABLE_ST, control_cb);
-    glui->add_edittext_to_panel(st_rollout, "Number of segments:", GLUI_EDITTEXT_INT, &slices.number_of_slices);
+
+    GLUI_Listbox *st_radius_lb = glui->add_listbox_to_panel(st_rollout, "Radius:", &st_radius);
+    st_radius_lb->add_item(SCALAR_RHO, "Fluid Density");
+    st_radius_lb->add_item(SCALAR_VELOC_MAG, "Fluid Velocity Magnitude");
+    st_radius_lb->add_item(SCALAR_FORCE_MAG, "Force Field Magnitude");
+    st_radius_lb->add_item(3, "3");
+    st_radius_lb->add_item(10, "10");
 
     //new GLUI_Button(st_rollout, "Manage Seeds", ENABLE_ST, control_cb);
     st_rollout->close();

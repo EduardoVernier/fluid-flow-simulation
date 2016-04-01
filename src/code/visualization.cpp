@@ -56,6 +56,7 @@ float dataset_scale = 30;
 // Stream Tubes variables
 int draw_st_flag = 0;
 StreamTubeManager stream_tube_manager = StreamTubeManager();
+int st_radius = SCALAR_RHO;
 
 void update_textures()
 {
@@ -306,7 +307,7 @@ void draw_stream_tubes()
 
     for(unsigned tube = 0; tube < stream_tube_manager.stream_tube_vector.size(); ++tube)
 	{
-        stream_tube_manager.stream_tube_vector[tube].calc_all_points(100);
+        stream_tube_manager.stream_tube_vector[tube].calc_all_points(100, st_radius);
 		vector<tuple<float, float, float> > v = stream_tube_manager.stream_tube_vector[tube].stream_tube_points;
 
         for (unsigned i = 0; i < stream_tube_manager.stream_tube_vector[tube].stream_tube_points.size()-1; ++i)
@@ -315,8 +316,8 @@ void draw_stream_tubes()
 			for (int k = 0; k < points; ++k)
 			{
 				double angle = slice * k;
-				float radius1 = std::get<2>(v[i]) * 10;
-				float radius2 = std::get<2>(v[i+1]) * 10;
+				float radius1 = std::get<2>(v[i]);
+				float radius2 = std::get<2>(v[i+1]);
 
 				float x1 = wn*std::get<0>(v[i]) + radius1*cos(angle);
 				float y1 = hn*std::get<1>(v[i]) + radius1*sin(angle);
@@ -324,6 +325,7 @@ void draw_stream_tubes()
 				float x2 = wn*std::get<0>(v[i+1]) + radius2*cos(angle);
 				float y2 = hn*std::get<1>(v[i+1]) + radius2*sin(angle);
 				float z2 = (i+1)*height_scale;
+
 				angle = slice * (k+1);
 				float x3 = wn*std::get<0>(v[i]) + radius1*cos(angle);
 				float y3 = hn*std::get<1>(v[i]) + radius1*sin(angle);
