@@ -538,7 +538,8 @@ void init_control_window()
     st_radius_lb->add_item(3, "3");
     st_radius_lb->add_item(10, "10");
 
-    //new GLUI_Button(st_rollout, "Manage Seeds", ENABLE_ST, control_cb);
+    glui->add_edittext_to_panel(st_rollout, "Z scaling:", GLUI_EDITTEXT_FLOAT, &st_height);
+
     st_rollout->close();
 
     new GLUI_Button(glui, "Pause/Play", PP_ID, control_cb);

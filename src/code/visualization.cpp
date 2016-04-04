@@ -57,6 +57,7 @@ float dataset_scale = 30;
 int draw_st_flag = 0;
 StreamTubeManager stream_tube_manager = StreamTubeManager();
 int st_radius = SCALAR_RHO;
+float st_height = 10;
 
 void update_textures()
 {
@@ -281,16 +282,13 @@ void compute_normal(int idx, float *norm)
 
 void cross_product(float ax, float ay, float az, float bx, float by, float bz, float *rx, float *ry, float *rz)
 {
-	float v_lenght = sqrtf(pow(ax-bx,2)
-						   + pow(ay-by,2)
-						   + pow(az-bz,2));
+	float v_lenght = sqrtf(pow(ax-bx,2) + pow(ay-by,2) + pow(az-bz,2));
 	if (v_lenght < 1.0e-6)
 		v_lenght = 1;
 
 	*rx = (ay*bz - az*by)/v_lenght;
 	*ry = (az*bx - ax*bz)/v_lenght;
 	*rz = (ax*by - ay*bx)/v_lenght;
-
 }
 
 void draw_stream_tubes()
@@ -300,7 +298,6 @@ void draw_stream_tubes()
 
 	int points = 20;
 	double slice = 2*M_PI/points;
-	float height_scale = 10;
 
 	glEnable(GL_TEXTURE_1D);
 	glBindTexture(GL_TEXTURE_1D, isoline_texture[0]);
@@ -321,24 +318,24 @@ void draw_stream_tubes()
 
 				float x1 = wn*std::get<0>(v[i]) + radius1*cos(angle);
 				float y1 = hn*std::get<1>(v[i]) + radius1*sin(angle);
-				float z1 = i*height_scale;
+				float z1 = i*st_height;
 				float x2 = wn*std::get<0>(v[i+1]) + radius2*cos(angle);
 				float y2 = hn*std::get<1>(v[i+1]) + radius2*sin(angle);
-				float z2 = (i+1)*height_scale;
+				float z2 = (i+1)*st_height;
 
 				angle = slice * (k+1);
 				float x3 = wn*std::get<0>(v[i]) + radius1*cos(angle);
 				float y3 = hn*std::get<1>(v[i]) + radius1*sin(angle);
-				float z3 = i*height_scale;
+				float z3 = i*st_height;
 				float x4 = wn*std::get<0>(v[i+1]) + radius2*cos(angle);
 				float y4 = hn*std::get<1>(v[i+1]) + radius2*sin(angle);
-				float z4 = (i+1)*height_scale;
+				float z4 = (i+1)*st_height;
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 				set_color(0, isoline_colormap);
 				float nx, ny, nz;
-				cross_product(x1-x2, y1-y2, z1-z2, x1-x3, y1-y3, z1-y3, &nx, &ny, &nz);
+				cross_product(x1-x2, y1-y2, z1-z2, x1-x3, y1-y3, z1-z3, &nx, &ny, &nz);
 				glNormal3f(nx, ny, nz);
 				glVertex3f(x3, y3, z3);
 				glVertex3f(x4, y4, z4);
@@ -401,7 +398,7 @@ void visualize(void)
             py = hn + (fftw_real)j * hn;
             int idx = (j * DIM) + i;
             set_color(dataset[idx], scalar_colormap);
-            glVertex3f(px,py,0);
+            glVertex3f(px,py,-0.01);
 
             for (i = 0; i < DIM - 1; i++)
             {
@@ -409,18 +406,18 @@ void visualize(void)
                 py = hn + (fftw_real)(j + 1) * hn;
                 idx = ((j + 1) * DIM) + i;
                 set_color(dataset[idx], scalar_colormap);
-                glVertex3f(px,py,0);
+                glVertex3f(px,py,-0.01);
                 px = wn + (fftw_real)(i + 1) * wn;
                 py = hn + (fftw_real)j * hn;
                 idx = (j * DIM) + (i + 1);
                 set_color(dataset[idx], scalar_colormap);
-                glVertex3f(px,py,0);
+                glVertex3f(px,py,-0.01);
             }
             px = wn + (fftw_real)(DIM - 1) * wn;
             py = hn + (fftw_real)(j + 1) * hn;
             idx = ((j + 1) * DIM) + (DIM - 1);
             set_color(dataset[idx], scalar_colormap);
-            glVertex3f(px,py,0);
+            glVertex3f(px,py,-0.01);
             glEnd();
         }
 		glDisable(GL_TEXTURE_1D);

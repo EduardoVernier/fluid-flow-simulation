@@ -24,6 +24,8 @@ public:
     void color_glyph(int i, int j);
     void direction_to_color(float x, float y);
     void bilinear_interpolation(double *vec, double *vf_x, double *vf_y, double i, double j);
+    void cross_product(float ax, float ay, float az, float bx, float by, float bz, float *rx, float *ry, float *rz);
+
 
     double *vf_x, *vf_y;
     double vec_scale;
