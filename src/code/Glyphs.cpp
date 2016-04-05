@@ -15,7 +15,7 @@ Glyphs::Glyphs()
 
 void Glyphs::draw_glyphs()
 {
-    double wn = (double)(winWidth*0.9) / (double)(DIM + 1);   // Grid cell width
+    double wn = (double)(winWidth*0.95) / (double)(DIM + 1);   // Grid cell width
     double hn = (double)(winHeight) / (double)(DIM + 1);  // Grid cell heigh
 
     if (vector_field == VECTOR_VELOC)
@@ -40,9 +40,9 @@ void Glyphs::draw_glyphs()
     if (glyph_type == GLYPH_LINE)
     {
         glBegin(GL_LINES);
-        for (double i = 0; i < DIM; i += (DIM/(double)x_axis_samples))
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
         {
-            for (double j = 0; j < DIM; j += (DIM/(double)y_axis_samples))
+            for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
             {
                 double vec [2] = {0,0};
                 srand (i*DIM +j);
@@ -62,8 +62,8 @@ void Glyphs::draw_glyphs()
     {
         glBegin(GL_TRIANGLES);
 
-        for (double i = 0; i < DIM; i += (DIM/(double)x_axis_samples))
-            for (double j = 0; j < DIM; j += (DIM/(double)y_axis_samples))
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
+            for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
             {
                 double vec [2] = {0,0};
                 srand (i*DIM +j);
@@ -93,9 +93,9 @@ void Glyphs::draw_glyphs()
     else if (glyph_type == GLYPH_ARROW)
     {
         glBegin(GL_LINES);
-        for (double i = 0; i < DIM; i += (DIM/(double)x_axis_samples))
+        for (double i = 0; i < DIM+0.01; i += (DIM/(double)x_axis_samples))
         {
-            for (double j = 0; j < DIM; j += (DIM/(double)y_axis_samples))
+            for (double j = 0; j < DIM+0.01; j += (DIM/(double)y_axis_samples))
             {
                 double vec [2] = {0,0};
                 srand (i*DIM +j);

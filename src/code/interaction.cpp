@@ -541,7 +541,7 @@ void init_control_window()
     st_radius_lb->add_item(10, "10");
 
     glui->add_edittext_to_panel(st_rollout, "Z scaling:", GLUI_EDITTEXT_FLOAT, &st_height);
-    GLUI_Button *st_reset = new GLUI_Button(st_rollout, "Reset Stream Tubes", RESET_ST, control_cb);
+    new GLUI_Button(st_rollout, "Reset Stream Tubes", RESET_ST, control_cb);
 
     st_rollout->close();
 
