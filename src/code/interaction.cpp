@@ -123,10 +123,10 @@ void update_variables_config_window()
     hh_text->set_text(buffer);
     sprintf(buffer, "= %.6f", visc);
     visc_text->set_text(buffer);
-    sprintf(buffer, "X axis = %d", glyphs.x_axis_samples);
-    x_sample_text->set_text(buffer);
-    sprintf(buffer, "Y axis = %d", glyphs.y_axis_samples);
-    y_sample_text->set_text(buffer);
+    //sprintf(buffer, "X axis = %d", glyphs.x_axis_samples);
+    //x_sample_text->set_text(buffer);
+    //sprintf(buffer, "Y axis = %d", glyphs.y_axis_samples);
+    //y_sample_text->set_text(buffer);
 
     scale_edittext->set_float_val(dataset_scale);
     eye_x_edittext->set_float_val(eye_x);
@@ -413,14 +413,12 @@ void init_control_window()
     new GLUI_Button(hedgehog_panel, "Increase", HH_INCREASE_ID, control_cb);
     new GLUI_Button(hedgehog_panel, "Decrease", HH_DECREASE_ID, control_cb);
 
+
     GLUI_Panel *sample_panel = new GLUI_Panel (glyph_rollout, "Number of samples");
-    x_sample_text = glui->add_statictext_to_panel(sample_panel, "");
-    new GLUI_Button(sample_panel, "Increase", SX_INCREASE_ID, control_cb);
-    new GLUI_Button(sample_panel, "Decrease", SX_DECREASE_ID, control_cb);
-    glui->add_column_to_panel(sample_panel, false);
-    y_sample_text = glui->add_statictext_to_panel(sample_panel, "");
-    new GLUI_Button(sample_panel, "Increase", SY_INCREASE_ID, control_cb);
-    new GLUI_Button(sample_panel, "Decrease", SY_DECREASE_ID, control_cb);
+    glui->add_edittext_to_panel(sample_panel, "X: ", GLUI_EDITTEXT_INT, &glyphs.x_axis_samples);
+    glui->add_edittext_to_panel(sample_panel, "Y: ", GLUI_EDITTEXT_INT, &glyphs.y_axis_samples);
+    glui->add_checkbox_to_panel(sample_panel, "Enable Jitter", &glyphs.jitter, 0, control_cb);
+
     glyph_rollout->close();
 
     // Isolines

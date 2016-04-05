@@ -2,7 +2,8 @@
 #define GLYPHS_H
 
 #include <GL/glut.h>
-#include <math.h>
+#include <cmath>
+#include <stdlib.h>
 
 #include "Globals.cpp"
 #include "Color.cpp"
@@ -33,6 +34,7 @@ public:
     int scalar_field;
     int vector_field;
     int x_axis_samples, y_axis_samples;
+    int jitter = 0;
 };
 
 #endif // GLYPHS_H
