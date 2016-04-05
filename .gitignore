@@ -1,14 +1,4 @@
 ### Qt ###
-# C++ objects and libs
-
-*.slo
-*.lo
-*.la
-*.lai
-*.so
-*.dll
-*.dylib
-
 # Qt-es
 
 /.qmake.cache
