@@ -34,7 +34,8 @@ C_Z_DECREASE_ID,
 SCALE_INCREASE_ID,
 SCALE_DECREASE_ID,
 UPDATE_SCALAR_COLORMAP,
-ENABLE_ST
+ENABLE_ST,
+RESET_ST
 };
 
 // statictext objects pointers are global because control_cb callback
@@ -316,6 +317,9 @@ void control_cb(int control)
         case ENABLE_ST:
             update_textures();
             break;
+        case RESET_ST:
+            stream_tube_manager = StreamTubeManager();
+            break;
         }
 
         update_variables_config_window();
@@ -537,6 +541,7 @@ void init_control_window()
     st_radius_lb->add_item(10, "10");
 
     glui->add_edittext_to_panel(st_rollout, "Z scaling:", GLUI_EDITTEXT_FLOAT, &st_height);
+    GLUI_Button *st_reset = new GLUI_Button(st_rollout, "Reset Stream Tubes", RESET_ST, control_cb);
 
     st_rollout->close();
 
