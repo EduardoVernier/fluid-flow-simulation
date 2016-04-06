@@ -321,6 +321,7 @@ void control_cb(int control)
             stream_tube_manager = StreamTubeManager();
             break;
         }
+        update_textures();
 
         update_variables_config_window();
         glutPostRedisplay();
