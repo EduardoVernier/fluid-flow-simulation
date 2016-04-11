@@ -1,4 +1,5 @@
 #include "IsolineManager.h"
+#include "stdio.h"
 
 IsolineManager::IsolineManager()
 {
@@ -11,11 +12,13 @@ IsolineManager::IsolineManager()
 void IsolineManager::reset()
 {
     isoline_vector.clear();
-    for (int i = 0; i < n; ++i)
+    for (int i = 1; i <= n; ++i)
     {
         Isoline t = Isoline(v1 + i*((v2-v1)/(float)n), rho);
         isoline_vector.push_back(t);
+        printf("%f ", v1 + i*((v2-v1)/(float)n));
     }
+    printf("\n");
 }
 
 void IsolineManager::create_isoline()

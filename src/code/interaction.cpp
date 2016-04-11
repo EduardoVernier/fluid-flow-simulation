@@ -150,7 +150,7 @@ void add_range_to_custom_cm (int i)
 
     custom.add_color_range(a, b, args[6], args[7]);
     update_textures();
-    resume(0);
+    //resume(0);
     cust_window->close();
     cust_window = NULL;
 }
@@ -242,7 +242,7 @@ void control_cb(int control)
             exit(0);
             break;
         case COLOR_CUSTOM:
-            glutTimerFunc(100, resume, 1);
+            //glutTimerFunc(100, resume, 1);
             handle_custom_colormap();
         case COLOR_RAINBOW:
         case COLOR_BLACKWHITE:
