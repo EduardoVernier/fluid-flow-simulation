@@ -492,28 +492,28 @@ void init_control_window()
     GLUI_Panel *c_x_panel = new GLUI_Panel (height_rollout, "");
     c_x_edittext = glui->add_edittext_to_panel(c_x_panel, "C x:", GLUI_EDITTEXT_FLOAT, &c_x);
     glui->add_column_to_panel(c_x_panel, false);
-    GLUI_Button *increase_c_x = new GLUI_Button(c_x_panel, "+", EYE_X_INCREASE_ID, control_cb);
+    GLUI_Button *increase_c_x = new GLUI_Button(c_x_panel, "+", C_X_INCREASE_ID, control_cb);
     increase_c_x->set_w(10);
     glui->add_column_to_panel(c_x_panel, false);
-    GLUI_Button *decrease_c_x = new GLUI_Button(c_x_panel, "-", EYE_X_DECREASE_ID, control_cb);
+    GLUI_Button *decrease_c_x = new GLUI_Button(c_x_panel, "-", C_X_DECREASE_ID, control_cb);
     decrease_c_x->set_w(10);
 
     GLUI_Panel *c_y_panel = new GLUI_Panel (height_rollout, "");
     c_y_edittext = glui->add_edittext_to_panel(c_y_panel, "C y:", GLUI_EDITTEXT_FLOAT, &c_y);
     glui->add_column_to_panel(c_y_panel, false);
-    GLUI_Button *increase_c_y = new GLUI_Button(c_y_panel, "+", EYE_Y_INCREASE_ID, control_cb);
+    GLUI_Button *increase_c_y = new GLUI_Button(c_y_panel, "+", C_Y_INCREASE_ID, control_cb);
     increase_c_y->set_w(10);
     glui->add_column_to_panel(c_y_panel, false);
-    GLUI_Button *decrease_c_y = new GLUI_Button(c_y_panel, "-", EYE_Y_DECREASE_ID, control_cb);
+    GLUI_Button *decrease_c_y = new GLUI_Button(c_y_panel, "-", C_Y_DECREASE_ID, control_cb);
     decrease_c_y->set_w(10);
 
     GLUI_Panel *c_z_panel = new GLUI_Panel (height_rollout, "");
     c_z_edittext = glui->add_edittext_to_panel(c_z_panel, "C z:", GLUI_EDITTEXT_FLOAT, &c_z);
     glui->add_column_to_panel(c_z_panel, false);
-    GLUI_Button *increase_c_z = new GLUI_Button(c_z_panel, "+", EYE_Z_INCREASE_ID, control_cb);
+    GLUI_Button *increase_c_z = new GLUI_Button(c_z_panel, "+", C_Z_INCREASE_ID, control_cb);
     increase_c_z->set_w(10);
     glui->add_column_to_panel(c_z_panel, false);
-    GLUI_Button *decrease_c_z = new GLUI_Button(c_z_panel, "-", EYE_Z_DECREASE_ID, control_cb);
+    GLUI_Button *decrease_c_z = new GLUI_Button(c_z_panel, "-", C_Z_DECREASE_ID, control_cb);
     decrease_c_z->set_w(10);
 
     GLUI_Panel *scale_panel = new GLUI_Panel (height_rollout, "");
